@@ -1,0 +1,110 @@
+# This "input" configures a global authorization rule to enable public access to
+# all models in this schema. Learn more about authorization rules here: https://docs.amplify.aws/cli/graphql/authorization-rules
+input AMPLIFY { globalAuthRule: AuthRule = { allow: public } } # FOR TESTING ONLY!
+
+type IssueGuide @model {
+    issue: Issue!
+    options: [Option!]
+    author: String!
+    version: String!
+    status: String!
+    updatedAt: AWSDateTime!
+}
+
+type Issue {
+    title: String!
+    description: String!
+    presentationUrl: String
+    documentUrl: String
+    additionalDocuments: [AdditionalDocument]
+    exitUrl: String
+    exitUrlParameters: [ExitUrlParameter!]
+}
+
+type AdditionalDocument {
+    name: String!
+    url: String!
+}
+
+type ExitUrlParameter {
+    name: String!
+    value: String!
+}
+
+type Option {
+    title: String!
+    description: String!
+    presentationUrl: String
+    actions: [Action!]
+}
+
+type Action {
+    description: String!
+    drawbacks: [Drawback!]
+}
+
+type Drawback {
+    description: String!
+}
+
+type ScheduledForum @model {
+    forumId: String!
+    joinId: String!
+    issueGuide: IssueGuide!
+    title: String!
+    startDate: AWSDateTime!
+    moderator: String!
+    requireAuthentication: Boolean!
+    guestList: [String!]
+    blacklist: [String!]
+    eventCategory: String!
+    lobbyOpenTime: AWSDateTime!
+    informedConsent: Boolean!
+    demographicQuestions: Boolean!
+    forumReport: Boolean!
+    exitUrl: String
+    exitUrlParameters: [ExitUrlParameter!]
+    messageToParticipants: String
+    chat: [Chat!]
+    participants: [Participant!]
+}
+
+type Gala @model {
+    forumId: String!
+    joinId: String!
+    issueGuide: IssueGuide!
+    title: String!
+    startDate: AWSDateTime!
+    endDate: AWSDateTime!
+    moderators: [String!]
+    requireAuthentication: Boolean!
+    guestList: [String!]
+    blacklist: [String!]
+    eventCategory: String!
+    numberOfParticipants: Int!
+    repeatedParticipation: Int!
+    totalParticipants: Int!
+    informedConsent: Boolean!
+    demographicQuestions: Boolean!
+    forumReport: Boolean!
+    futureForumsUrl: String!
+    exitUrl: String
+    exitUrlParameters: [ExitUrlParameter!]
+    messageToParticipants: String
+    chat: [Chat!]
+    participants: [Participant!]
+}
+
+type Participant {
+  name: String!
+  email: String!
+  role: String!
+}
+
+type Chat @model @auth(rules: [{allow: public}]) {
+    sender: Participant
+    email: String!
+    message: String!
+    timestamp: AWSDateTime!
+    recipient: Participant
+}

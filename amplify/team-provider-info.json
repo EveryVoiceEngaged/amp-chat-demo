@@ -1,0 +1,20 @@
+{
+  "dev": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-cga-dev-69022-authRole",
+      "UnauthRoleArn": "arn:aws:iam::637423533578:role/amplify-cga-dev-69022-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::637423533578:role/amplify-cga-dev-69022-authRole",
+      "Region": "us-east-2",
+      "DeploymentBucketName": "amplify-cga-dev-69022-deployment",
+      "UnauthRoleName": "amplify-cga-dev-69022-unauthRole",
+      "StackName": "amplify-cga-dev-69022",
+      "StackId": "arn:aws:cloudformation:us-east-2:637423533578:stack/amplify-cga-dev-69022/5cd05120-3432-11ef-a764-06107c0a586f",
+      "AmplifyAppId": "d3jt7fw02xdfxu"
+    },
+    "categories": {
+      "auth": {
+        "cga": {}
+      }
+    }
+  }
+}
