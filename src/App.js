@@ -66,7 +66,9 @@ function App({ user, signOut }) {
       <div className="flex justify-center items-center h-screen w-full">
         <div className={`w-3/4 flex flex-col`}>
           {chats.map((chat, index) => (
-            <div key={index}>{chat.message}</div>
+            <div key={index} className="mb-2">
+              <strong>{chat.email}:</strong> {chat.message}
+            </div>
           ))}
           <div>
             <div className="relative mt-2 flex items-center">
