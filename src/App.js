@@ -4,10 +4,14 @@ import { withAuthenticator } from "@aws-amplify/ui-react";
 import React, { useState, useEffect } from "react";
 import { generateClient } from 'aws-amplify/api';
 import * as mutations from "./graphql/mutations";
-import * as queries from "./graphql/queries";
 import * as subscriptions from "./graphql/subscriptions";
 
 const client = generateClient();
+
+function formatTime(isoString) {
+  const date = new Date(isoString);
+  return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+}
 
 function App({ user, signOut }) {
   console.log(user);
@@ -66,8 +70,14 @@ function App({ user, signOut }) {
       <div className="flex justify-center items-center h-screen w-full">
         <div className={`w-3/4 flex flex-col`}>
           {chats.map((chat, index) => (
-            <div key={index} className="mb-2">
-              <strong>{chat.email}:</strong> {chat.message}
+            <div key={index} className="mb-4">
+              <div className="flex items-baseline">
+                <strong className="mr-2">{chat.email}:</strong>
+                <span>{chat.message}</span>
+              </div>
+              <div className="text-xs text-gray-500 mt-1">
+                {formatTime(chat.timestamp)}
+              </div>
             </div>
           ))}
           <div>
