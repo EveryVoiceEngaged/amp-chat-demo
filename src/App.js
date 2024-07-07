@@ -1,10 +1,11 @@
 import "./App.css";
 import "@aws-amplify/ui-react/styles.css";
 import { withAuthenticator } from "@aws-amplify/ui-react";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { generateClient } from 'aws-amplify/api';
 import * as mutations from "./graphql/mutations";
 import * as subscriptions from "./graphql/subscriptions";
+import * as queries from "./graphql/queries";
 
 const client = generateClient();
 
@@ -14,11 +15,13 @@ function formatTime(isoString) {
 }
 
 function App({ user, signOut }) {
-  console.log(user);
   const userEmail = user.signInDetails.loginId;
   const [chats, setChats] = useState([]);
+  const messagesEndRef = useRef(null);
 
   useEffect(() => {
+    fetchChats();
+    
     const sub = client.graphql({
       query: subscriptions.onCreateChat
     }).subscribe({
@@ -34,6 +37,29 @@ function App({ user, signOut }) {
       sub.unsubscribe();
     };
   }, []);
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [chats]);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  const fetchChats = async () => {
+    try {
+      const chatData = await client.graphql({
+        query: queries.listChats,
+        variables: { limit: 1000 }
+      });
+      const sortedChats = chatData.data.listChats.items.sort(
+        (a, b) => new Date(a.timestamp) - new Date(b.timestamp)
+      );
+      setChats(sortedChats);
+    } catch (error) {
+      console.error('Error fetching chats:', error);
+    }
+  };
 
   const handleKeyUp = async (e) => {
     if (e.key === "Enter") {
@@ -56,8 +82,24 @@ function App({ user, signOut }) {
     }
   };
 
+  const handleDelete = async (chatId) => {
+    try {
+      await client.graphql({
+        query: mutations.deleteChat,
+        variables: {
+          input: {
+            id: chatId
+          },
+        },
+      });
+      setChats(chats.filter(chat => chat.id !== chatId));
+    } catch (error) {
+      console.error('Error deleting chat:', error);
+    }
+  };
+
   return (
-    <div>
+    <div className="flex flex-col h-screen">
       <div className="flex justify-end px-4 py-2">
         <button
           type="button"
@@ -67,33 +109,42 @@ function App({ user, signOut }) {
           Sign Out
         </button>
       </div>
-      <div className="flex justify-center items-center h-screen w-full">
-        <div className={`w-3/4 flex flex-col`}>
-          {chats.map((chat, index) => (
-            <div key={index} className="mb-4">
-              <div className="flex items-baseline">
-                <strong className="mr-2">{chat.email}:</strong>
-                <span>{chat.message}</span>
+      <div className="flex-grow flex justify-center items-center p-4">
+        <div className="w-3/4 flex flex-col h-[80vh]">
+          <div className="flex-grow overflow-y-auto mb-4 p-4 border border-gray-300 rounded">
+            {chats.map((chat) => (
+              <div key={chat.id} className="mb-4 flex items-start">
+                <div className="flex-grow">
+                  <div className="flex items-baseline">
+                    <strong className="mr-2">{chat.email}:</strong>
+                    <span>{chat.message}</span>
+                  </div>
+                  <div className="text-xs text-gray-500 mt-1">
+                    {formatTime(chat.timestamp)}
+                  </div>
+                </div>
+                <button
+                  onClick={() => handleDelete(chat.id)}
+                  className="ml-2 text-red-500 hover:text-red-700"
+                >
+                  &#x2715;
+                </button>
               </div>
-              <div className="text-xs text-gray-500 mt-1">
-                {formatTime(chat.timestamp)}
-              </div>
-            </div>
-          ))}
-          <div>
-            <div className="relative mt-2 flex items-center">
-              <input
-                type="text"
-                name="search"
-                id="search"
-                onKeyUp={handleKeyUp}
-                className="block w-full rounded-md border-0 py-1.5 pr-14 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-              />
-              <div className="absolute inset-y-0 right-0 flex py-1.5 pr-1.5">
-                <kbd className="inline-flex items-center rounded border border-gray-200 px-1 font-sans text-xs text-gray-400">
-                  Enter
-                </kbd>
-              </div>
+            ))}
+            <div ref={messagesEndRef} />
+          </div>
+          <div className="relative">
+            <input
+              type="text"
+              name="search"
+              id="search"
+              onKeyUp={handleKeyUp}
+              className="block w-full rounded-md border-0 py-1.5 pr-14 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+            />
+            <div className="absolute inset-y-0 right-0 flex py-1.5 pr-1.5">
+              <kbd className="inline-flex items-center rounded border border-gray-200 px-1 font-sans text-xs text-gray-400">
+                Enter
+              </kbd>
             </div>
           </div>
         </div>
