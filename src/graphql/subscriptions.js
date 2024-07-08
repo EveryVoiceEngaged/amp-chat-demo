@@ -505,3 +505,45 @@ export const onDeleteChat = /* GraphQL */ `
     }
   }
 `;
+export const onCreateUserPresence = /* GraphQL */ `
+  subscription OnCreateUserPresence(
+    $filter: ModelSubscriptionUserPresenceFilterInput
+  ) {
+    onCreateUserPresence(filter: $filter) {
+      id
+      email
+      status
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const onUpdateUserPresence = /* GraphQL */ `
+  subscription OnUpdateUserPresence(
+    $filter: ModelSubscriptionUserPresenceFilterInput
+  ) {
+    onUpdateUserPresence(filter: $filter) {
+      id
+      email
+      status
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const onDeleteUserPresence = /* GraphQL */ `
+  subscription OnDeleteUserPresence(
+    $filter: ModelSubscriptionUserPresenceFilterInput
+  ) {
+    onDeleteUserPresence(filter: $filter) {
+      id
+      email
+      status
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;

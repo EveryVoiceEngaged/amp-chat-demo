@@ -277,3 +277,35 @@ export const listChats = /* GraphQL */ `
     }
   }
 `;
+export const getUserPresence = /* GraphQL */ `
+  query GetUserPresence($id: ID!) {
+    getUserPresence(id: $id) {
+      id
+      email
+      status
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const listUserPresences = /* GraphQL */ `
+  query ListUserPresences(
+    $filter: ModelUserPresenceFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    listUserPresences(filter: $filter, limit: $limit, nextToken: $nextToken) {
+      items {
+        id
+        email
+        status
+        createdAt
+        updatedAt
+        __typename
+      }
+      nextToken
+      __typename
+    }
+  }
+`;

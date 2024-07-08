@@ -529,3 +529,48 @@ export const deleteChat = /* GraphQL */ `
     }
   }
 `;
+export const createUserPresence = /* GraphQL */ `
+  mutation CreateUserPresence(
+    $input: CreateUserPresenceInput!
+    $condition: ModelUserPresenceConditionInput
+  ) {
+    createUserPresence(input: $input, condition: $condition) {
+      id
+      email
+      status
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const updateUserPresence = /* GraphQL */ `
+  mutation UpdateUserPresence(
+    $input: UpdateUserPresenceInput!
+    $condition: ModelUserPresenceConditionInput
+  ) {
+    updateUserPresence(input: $input, condition: $condition) {
+      id
+      email
+      status
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
+export const deleteUserPresence = /* GraphQL */ `
+  mutation DeleteUserPresence(
+    $input: DeleteUserPresenceInput!
+    $condition: ModelUserPresenceConditionInput
+  ) {
+    deleteUserPresence(input: $input, condition: $condition) {
+      id
+      email
+      status
+      createdAt
+      updatedAt
+      __typename
+    }
+  }
+`;
