@@ -10,15 +10,11 @@ import * as queries from "./graphql/queries";
 const client = generateClient();
 
 const UserPresenceIndicator = ({ email }) => {
-  const initials = email
-    .split('@')[0]
-    .split('.')
-    .map(name => name[0].toUpperCase())
-    .join('');
+  const initial = email[0].toUpperCase();
 
   return (
     <div className="w-8 h-8 rounded-full bg-indigo-500 flex items-center justify-center text-white text-sm font-semibold">
-      {initials}
+      {initial}
     </div>
   );
 };
@@ -36,18 +32,44 @@ function App({ signOut, user }) {
 
   const updateUserPresence = useCallback(async (status = 'online') => {
     try {
-      await client.graphql({
-        query: mutations.updateUserPresence,
-        variables: {
-          input: {
-            id: userEmail, // Assuming email is used as the ID
-            email: userEmail,
-            status: status
-          }
-        }
+      console.log(`Updating presence for ${userEmail} to ${status}`);
+      
+      // First, try to get the existing user presence
+      const getUserPresence = await client.graphql({
+        query: queries.getUserPresence,
+        variables: { id: userEmail }
       });
+  
+      if (getUserPresence.data.getUserPresence) {
+        // If the user presence exists, update it
+        const response = await client.graphql({
+          query: mutations.updateUserPresence,
+          variables: {
+            input: {
+              id: userEmail,
+              email: userEmail,
+              status: status
+            }
+          }
+        });
+        console.log('User presence updated:', response);
+      } else {
+        // If the user presence doesn't exist, create it
+        const response = await client.graphql({
+          query: mutations.createUserPresence,
+          variables: {
+            input: {
+              id: userEmail,
+              email: userEmail,
+              status: status
+            }
+          }
+        });
+        console.log('User presence created:', response);
+      }
     } catch (error) {
       console.error('Error updating user presence:', error);
+      console.error('Error details:', JSON.stringify(error, null, 2));
     }
   }, [userEmail]);
 
