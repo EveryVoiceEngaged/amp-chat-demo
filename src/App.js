@@ -235,12 +235,14 @@ function App({ signOut, user }) {
                     {formatTime(chat.timestamp)}
                   </div>
                 </div>
-                <button
-                  onClick={() => handleDelete(chat.id)}
-                  className="ml-2 text-red-500 hover:text-red-700"
-                >
-                  &#x2715;
-                </button>
+                {chat.email === userEmail && (
+                  <button
+                    onClick={() => handleDelete(chat.id)}
+                    className="ml-2 text-red-500 hover:text-red-700"
+                  >
+                    &#x2715;
+                  </button>
+                )}
               </div>
             ))}
             <div ref={messagesEndRef} />
