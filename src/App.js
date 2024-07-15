@@ -34,7 +34,6 @@ function App({ signOut, user }) {
     try {
       console.log(`Updating presence for ${userEmail} to ${status}`);
       
-      // First, try to get the existing user presence
       const getUserPresence = await client.graphql({
         query: queries.getUserPresence,
         variables: { id: userEmail }
@@ -43,7 +42,6 @@ function App({ signOut, user }) {
       const currentTimestamp = new Date().toISOString();
   
       if (getUserPresence.data.getUserPresence) {
-        // If the user presence exists, update it
         const response = await client.graphql({
           query: mutations.updateUserPresence,
           variables: {
@@ -57,7 +55,6 @@ function App({ signOut, user }) {
         });
         console.log('User presence updated:', response);
       } else {
-        // If the user presence doesn't exist, create it
         const response = await client.graphql({
           query: mutations.createUserPresence,
           variables: {
@@ -81,14 +78,35 @@ function App({ signOut, user }) {
     try {
       const chatData = await client.graphql({
         query: queries.listChats,
-        variables: { limit: 1000 }
+        variables: { 
+          limit: 1000,
+          nextToken: null,
+          filter: null,
+        }
       });
-      const sortedChats = chatData.data.listChats.items.sort(
-        (a, b) => new Date(a.timestamp) - new Date(b.timestamp)
-      );
+      
+      // Fetch reactions for each chat
+      const chatsWithReactions = await Promise.all(chatData.data.listChats.items.map(async (chat) => {
+        const reactionData = await client.graphql({
+          query: queries.listReactions,
+          variables: {
+            filter: { chatReactionsId: { eq: chat.id } }
+          }
+        });
+        
+        return {
+          ...chat,
+          reactions: reactionData.data.listReactions.items
+        };
+      }));
+  
+      const sortedChats = chatsWithReactions
+        .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+      
       setChats(sortedChats);
     } catch (error) {
       console.error('Error fetching chats:', error);
+      console.error('Error details:', JSON.stringify(error, null, 2));
     }
   }, []);
 
@@ -101,7 +119,7 @@ function App({ signOut, user }) {
       const activeUsers = presenceData.data.listUserPresences.items.filter(u => {
         const lastActiveTime = new Date(u.lastActiveTimestamp);
         const timeDifference = currentTime - lastActiveTime;
-        return u.status === 'online' && timeDifference < 5000; // 5 seconds
+        return u.status === 'online' && timeDifference < 5000;
       });
       setPresentUsers(activeUsers);
     } catch (error) {
@@ -117,19 +135,24 @@ function App({ signOut, user }) {
     const intervalId = setInterval(() => {
       updateUserPresence();
       fetchUserPresence();
-    }, 5000); // Update every 5 seconds
-
+    }, 5000);
+  
     const chatSub = client.graphql({
       query: subscriptions.onCreateChat
     }).subscribe({
       next: ({ data }) => {
         if (data.onCreateChat) {
-          setChats((prev) => [...prev, data.onCreateChat]);
+          setChats((prev) => {
+            if (!prev.some(chat => chat.id === data.onCreateChat.id)) {
+              return [...prev, {...data.onCreateChat, reactions: []}];
+            }
+            return prev;
+          });
         }
       },
       error: (err) => console.error(err)
     });
-
+  
     const deleteChatSub = client.graphql({
       query: subscriptions.onDeleteChat
     }).subscribe({
@@ -140,7 +163,44 @@ function App({ signOut, user }) {
       },
       error: (err) => console.error(err)
     });
-
+  
+    const reactionSub = client.graphql({
+      query: subscriptions.onCreateReaction
+    }).subscribe({
+      next: ({ data }) => {
+        if (data.onCreateReaction) {
+          setChats((prev) => prev.map(chat => 
+            chat.id === data.onCreateReaction.chatReactionsId
+              ? { ...chat, reactions: [...chat.reactions, data.onCreateReaction] }
+              : chat
+          ));
+        }
+      },
+      error: (err) => console.error(err)
+    });
+  
+    const updateReactionSub = client.graphql({
+      query: subscriptions.onUpdateReaction
+    }).subscribe({
+      next: ({ data }) => {
+        if (data.onUpdateReaction) {
+          setChats((prev) => prev.map(chat => 
+            chat.id === data.onUpdateReaction.chatReactionsId
+              ? { 
+                  ...chat, 
+                  reactions: chat.reactions.map(reaction =>
+                    reaction.id === data.onUpdateReaction.id
+                      ? data.onUpdateReaction
+                      : reaction
+                  )
+                }
+              : chat
+          ));
+        }
+      },
+      error: (err) => console.error(err)
+    });
+  
     const presenceSub = client.graphql({
       query: subscriptions.onUpdateUserPresence
     }).subscribe({
@@ -160,17 +220,19 @@ function App({ signOut, user }) {
       },
       error: (err) => console.error(err)
     });
-
+  
     const handleBeforeUnload = () => {
       updateUserPresence('offline');
     };
-
+  
     window.addEventListener('beforeunload', handleBeforeUnload);
-
+  
     return () => {
       clearInterval(intervalId);
       chatSub.unsubscribe();
       deleteChatSub.unsubscribe();
+      reactionSub.unsubscribe();
+      updateReactionSub.unsubscribe();
       presenceSub.unsubscribe();
       updateUserPresence('offline');
       window.removeEventListener('beforeunload', handleBeforeUnload);
@@ -184,7 +246,7 @@ function App({ signOut, user }) {
   const handleKeyUp = async (e) => {
     if (e.key === "Enter" && e.target.value.trim()) {
       try {
-        await client.graphql({
+        const newChat = await client.graphql({
           query: mutations.createChat,
           variables: {
             input: {
@@ -194,6 +256,7 @@ function App({ signOut, user }) {
             },
           },
         });
+        setChats((prev) => [...prev, {...newChat.data.createChat, reactions: []}]);
         e.target.value = "";
       } catch (error) {
         console.error('Error creating chat:', error);
@@ -211,11 +274,100 @@ function App({ signOut, user }) {
           },
         },
       });
-      // We don't need to update the local state here anymore
-      // as it will be updated by the subscription
+      setChats(chats.filter(chat => chat.id !== chatId));
     } catch (error) {
       console.error('Error deleting chat:', error);
     }
+  };
+
+  const handleReaction = async (chatId, emoji) => {
+    try {
+      const chat = chats.find(c => c.id === chatId);
+      if (!chat) {
+        console.error('Chat not found:', chatId);
+        return;
+      }
+
+      const existingReaction = chat.reactions.find(r => r.emoji === emoji);
+
+      if (existingReaction) {
+        console.log('Updating existing reaction:', existingReaction);
+        const updatedReaction = await client.graphql({
+          query: mutations.updateReaction,
+          variables: {
+            input: {
+              id: existingReaction.id,
+              count: existingReaction.count + 1
+            },
+          },
+        });
+        console.log('Reaction updated:', updatedReaction);
+      } else {
+        console.log('Creating new reaction for chat:', chatId);
+        const newReaction = await client.graphql({
+          query: mutations.createReaction,
+          variables: {
+            input: {
+              emoji: emoji,
+              count: 1,
+              chatReactionsId: chatId
+            },
+          },
+        });
+        console.log('New reaction created:', newReaction);
+      }
+    } catch (error) {
+      console.error('Error handling reaction:', error);
+      console.error('Error details:', JSON.stringify(error, null, 2));
+      console.error('Input that caused error:', {
+        emoji: emoji,
+        count: 1,
+        chatReactionsId: chatId
+      });
+    }
+  };
+
+  const ChatMessage = ({ chat, handleDelete, handleReaction }) => {
+    const emojis = ['👍', '❤️', '😂'];
+  
+    return (
+      <div key={chat.id} className="mb-4 flex flex-col">
+        <div className="flex items-start">
+          <div className="flex-grow">
+            <div className="flex items-baseline">
+              <strong className="mr-2">{chat.email}:</strong>
+              <span>{chat.message}</span>
+            </div>
+            <div className="flex mt-1">
+              {emojis.map((emoji) => {
+                const reaction = chat.reactions.find(r => r.emoji === emoji);
+                const count = reaction ? reaction.count : 0;
+                return (
+                  <button 
+                    key={emoji} 
+                    onClick={() => handleReaction(chat.id, emoji)} 
+                    className="mr-2 px-3 py-1 bg-gray-200 rounded-full text-sm hover:bg-gray-300"
+                  >
+                    {emoji} {count > 0 && count}
+                  </button>
+                );
+              })}
+            </div>
+            <div className="text-xs text-gray-500 mt-1">
+              {formatTime(chat.timestamp)}
+            </div>
+          </div>
+          {chat.email === userEmail && (
+            <button
+              onClick={() => handleDelete(chat.id)}
+              className="ml-2 text-red-500 hover:text-red-700"
+            >
+              &#x2715;
+            </button>
+          )}
+        </div>
+      </div>
+    );
   };
 
   return (
@@ -238,25 +390,12 @@ function App({ signOut, user }) {
         <div className="w-3/4 flex flex-col h-[80vh]">
           <div className="flex-grow overflow-y-auto mb-4 p-4 border border-gray-300 rounded">
             {chats.map((chat) => (
-              <div key={chat.id} className="mb-4 flex items-start">
-                <div className="flex-grow">
-                  <div className="flex items-baseline">
-                    <strong className="mr-2">{chat.email}:</strong>
-                    <span>{chat.message}</span>
-                  </div>
-                  <div className="text-xs text-gray-500 mt-1">
-                    {formatTime(chat.timestamp)}
-                  </div>
-                </div>
-                {chat.email === userEmail && (
-                  <button
-                    onClick={() => handleDelete(chat.id)}
-                    className="ml-2 text-red-500 hover:text-red-700"
-                  >
-                    &#x2715;
-                  </button>
-                )}
-              </div>
+              <ChatMessage 
+                key={chat.id}
+                chat={chat}
+                handleDelete={handleDelete}
+                handleReaction={handleReaction}
+              />
             ))}
             <div ref={messagesEndRef} />
           </div>

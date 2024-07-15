@@ -123,10 +123,10 @@ export const onCreateScheduledForum = /* GraphQL */ `
       }
       messageToParticipants
       chat {
-        email
-        message
-        timestamp
         id
+        message
+        email
+        timestamp
         createdAt
         updatedAt
         __typename
@@ -179,10 +179,10 @@ export const onUpdateScheduledForum = /* GraphQL */ `
       }
       messageToParticipants
       chat {
-        email
-        message
-        timestamp
         id
+        message
+        email
+        timestamp
         createdAt
         updatedAt
         __typename
@@ -235,10 +235,10 @@ export const onDeleteScheduledForum = /* GraphQL */ `
       }
       messageToParticipants
       chat {
-        email
-        message
-        timestamp
         id
+        message
+        email
+        timestamp
         createdAt
         updatedAt
         __typename
@@ -293,10 +293,10 @@ export const onCreateGala = /* GraphQL */ `
       }
       messageToParticipants
       chat {
-        email
-        message
-        timestamp
         id
+        message
+        email
+        timestamp
         createdAt
         updatedAt
         __typename
@@ -351,10 +351,10 @@ export const onUpdateGala = /* GraphQL */ `
       }
       messageToParticipants
       chat {
-        email
-        message
-        timestamp
         id
+        message
+        email
+        timestamp
         createdAt
         updatedAt
         __typename
@@ -409,10 +409,10 @@ export const onDeleteGala = /* GraphQL */ `
       }
       messageToParticipants
       chat {
-        email
-        message
-        timestamp
         id
+        message
+        email
+        timestamp
         createdAt
         updatedAt
         __typename
@@ -433,22 +433,14 @@ export const onDeleteGala = /* GraphQL */ `
 export const onCreateChat = /* GraphQL */ `
   subscription OnCreateChat($filter: ModelSubscriptionChatFilterInput) {
     onCreateChat(filter: $filter) {
-      sender {
-        name
-        email
-        role
-        __typename
-      }
-      email
-      message
-      timestamp
-      recipient {
-        name
-        email
-        role
-        __typename
-      }
       id
+      message
+      email
+      timestamp
+      reactions {
+        nextToken
+        __typename
+      }
       createdAt
       updatedAt
       __typename
@@ -458,22 +450,14 @@ export const onCreateChat = /* GraphQL */ `
 export const onUpdateChat = /* GraphQL */ `
   subscription OnUpdateChat($filter: ModelSubscriptionChatFilterInput) {
     onUpdateChat(filter: $filter) {
-      sender {
-        name
-        email
-        role
-        __typename
-      }
-      email
-      message
-      timestamp
-      recipient {
-        name
-        email
-        role
-        __typename
-      }
       id
+      message
+      email
+      timestamp
+      reactions {
+        nextToken
+        __typename
+      }
       createdAt
       updatedAt
       __typename
@@ -483,24 +467,82 @@ export const onUpdateChat = /* GraphQL */ `
 export const onDeleteChat = /* GraphQL */ `
   subscription OnDeleteChat($filter: ModelSubscriptionChatFilterInput) {
     onDeleteChat(filter: $filter) {
-      sender {
-        name
-        email
-        role
-        __typename
-      }
-      email
-      message
-      timestamp
-      recipient {
-        name
-        email
-        role
-        __typename
-      }
       id
+      message
+      email
+      timestamp
+      reactions {
+        nextToken
+        __typename
+      }
       createdAt
       updatedAt
+      __typename
+    }
+  }
+`;
+export const onCreateReaction = /* GraphQL */ `
+  subscription OnCreateReaction($filter: ModelSubscriptionReactionFilterInput) {
+    onCreateReaction(filter: $filter) {
+      id
+      emoji
+      count
+      chat {
+        id
+        message
+        email
+        timestamp
+        createdAt
+        updatedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      chatReactionsId
+      __typename
+    }
+  }
+`;
+export const onUpdateReaction = /* GraphQL */ `
+  subscription OnUpdateReaction($filter: ModelSubscriptionReactionFilterInput) {
+    onUpdateReaction(filter: $filter) {
+      id
+      emoji
+      count
+      chat {
+        id
+        message
+        email
+        timestamp
+        createdAt
+        updatedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      chatReactionsId
+      __typename
+    }
+  }
+`;
+export const onDeleteReaction = /* GraphQL */ `
+  subscription OnDeleteReaction($filter: ModelSubscriptionReactionFilterInput) {
+    onDeleteReaction(filter: $filter) {
+      id
+      emoji
+      count
+      chat {
+        id
+        message
+        email
+        timestamp
+        createdAt
+        updatedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      chatReactionsId
       __typename
     }
   }

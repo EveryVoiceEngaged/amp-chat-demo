@@ -102,14 +102,21 @@ type Participant {
 }
 
 type Chat @model @auth(rules: [{allow: public}]) {
-    sender: Participant
-    email: String!
-    message: String!
-    timestamp: AWSDateTime!
-    recipient: Participant
+  id: ID!
+  message: String!
+  email: String!
+  timestamp: AWSDateTime!
+  reactions: [Reaction] @hasMany
 }
 
-type UserPresence @model @auth(rules: [{ allow: public }]) {
+type Reaction @model @auth(rules: [{allow: public}]) {
+  id: ID!
+  emoji: String!
+  count: Int!
+  chat: Chat! @belongsTo
+}
+
+type UserPresence @model @auth(rules: [{allow: public}]) {
   id: ID!
   email: String!
   status: String!

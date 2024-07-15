@@ -127,10 +127,10 @@ export const createScheduledForum = /* GraphQL */ `
       }
       messageToParticipants
       chat {
-        email
-        message
-        timestamp
         id
+        message
+        email
+        timestamp
         createdAt
         updatedAt
         __typename
@@ -184,10 +184,10 @@ export const updateScheduledForum = /* GraphQL */ `
       }
       messageToParticipants
       chat {
-        email
-        message
-        timestamp
         id
+        message
+        email
+        timestamp
         createdAt
         updatedAt
         __typename
@@ -241,10 +241,10 @@ export const deleteScheduledForum = /* GraphQL */ `
       }
       messageToParticipants
       chat {
-        email
-        message
-        timestamp
         id
+        message
+        email
+        timestamp
         createdAt
         updatedAt
         __typename
@@ -302,10 +302,10 @@ export const createGala = /* GraphQL */ `
       }
       messageToParticipants
       chat {
-        email
-        message
-        timestamp
         id
+        message
+        email
+        timestamp
         createdAt
         updatedAt
         __typename
@@ -363,10 +363,10 @@ export const updateGala = /* GraphQL */ `
       }
       messageToParticipants
       chat {
-        email
-        message
-        timestamp
         id
+        message
+        email
+        timestamp
         createdAt
         updatedAt
         __typename
@@ -424,10 +424,10 @@ export const deleteGala = /* GraphQL */ `
       }
       messageToParticipants
       chat {
-        email
-        message
-        timestamp
         id
+        message
+        email
+        timestamp
         createdAt
         updatedAt
         __typename
@@ -451,22 +451,14 @@ export const createChat = /* GraphQL */ `
     $condition: ModelChatConditionInput
   ) {
     createChat(input: $input, condition: $condition) {
-      sender {
-        name
-        email
-        role
-        __typename
-      }
-      email
-      message
-      timestamp
-      recipient {
-        name
-        email
-        role
-        __typename
-      }
       id
+      message
+      email
+      timestamp
+      reactions {
+        nextToken
+        __typename
+      }
       createdAt
       updatedAt
       __typename
@@ -479,22 +471,14 @@ export const updateChat = /* GraphQL */ `
     $condition: ModelChatConditionInput
   ) {
     updateChat(input: $input, condition: $condition) {
-      sender {
-        name
-        email
-        role
-        __typename
-      }
-      email
-      message
-      timestamp
-      recipient {
-        name
-        email
-        role
-        __typename
-      }
       id
+      message
+      email
+      timestamp
+      reactions {
+        nextToken
+        __typename
+      }
       createdAt
       updatedAt
       __typename
@@ -507,24 +491,91 @@ export const deleteChat = /* GraphQL */ `
     $condition: ModelChatConditionInput
   ) {
     deleteChat(input: $input, condition: $condition) {
-      sender {
-        name
-        email
-        role
-        __typename
-      }
-      email
-      message
-      timestamp
-      recipient {
-        name
-        email
-        role
-        __typename
-      }
       id
+      message
+      email
+      timestamp
+      reactions {
+        nextToken
+        __typename
+      }
       createdAt
       updatedAt
+      __typename
+    }
+  }
+`;
+export const createReaction = /* GraphQL */ `
+  mutation CreateReaction(
+    $input: CreateReactionInput!
+    $condition: ModelReactionConditionInput
+  ) {
+    createReaction(input: $input, condition: $condition) {
+      id
+      emoji
+      count
+      chat {
+        id
+        message
+        email
+        timestamp
+        createdAt
+        updatedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      chatReactionsId
+      __typename
+    }
+  }
+`;
+export const updateReaction = /* GraphQL */ `
+  mutation UpdateReaction(
+    $input: UpdateReactionInput!
+    $condition: ModelReactionConditionInput
+  ) {
+    updateReaction(input: $input, condition: $condition) {
+      id
+      emoji
+      count
+      chat {
+        id
+        message
+        email
+        timestamp
+        createdAt
+        updatedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      chatReactionsId
+      __typename
+    }
+  }
+`;
+export const deleteReaction = /* GraphQL */ `
+  mutation DeleteReaction(
+    $input: DeleteReactionInput!
+    $condition: ModelReactionConditionInput
+  ) {
+    deleteReaction(input: $input, condition: $condition) {
+      id
+      emoji
+      count
+      chat {
+        id
+        message
+        email
+        timestamp
+        createdAt
+        updatedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      chatReactionsId
       __typename
     }
   }

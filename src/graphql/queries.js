@@ -82,10 +82,10 @@ export const getScheduledForum = /* GraphQL */ `
       }
       messageToParticipants
       chat {
-        email
-        message
-        timestamp
         id
+        message
+        email
+        timestamp
         createdAt
         updatedAt
         __typename
@@ -173,10 +173,10 @@ export const getGala = /* GraphQL */ `
       }
       messageToParticipants
       chat {
-        email
-        message
-        timestamp
         id
+        message
+        email
+        timestamp
         createdAt
         updatedAt
         __typename
@@ -234,22 +234,14 @@ export const listGalas = /* GraphQL */ `
 export const getChat = /* GraphQL */ `
   query GetChat($id: ID!) {
     getChat(id: $id) {
-      sender {
-        name
-        email
-        role
-        __typename
-      }
-      email
-      message
-      timestamp
-      recipient {
-        name
-        email
-        role
-        __typename
-      }
       id
+      message
+      email
+      timestamp
+      reactions {
+        nextToken
+        __typename
+      }
       createdAt
       updatedAt
       __typename
@@ -264,12 +256,55 @@ export const listChats = /* GraphQL */ `
   ) {
     listChats(filter: $filter, limit: $limit, nextToken: $nextToken) {
       items {
-        email
-        message
-        timestamp
         id
+        message
+        email
+        timestamp
         createdAt
         updatedAt
+        __typename
+      }
+      nextToken
+      __typename
+    }
+  }
+`;
+export const getReaction = /* GraphQL */ `
+  query GetReaction($id: ID!) {
+    getReaction(id: $id) {
+      id
+      emoji
+      count
+      chat {
+        id
+        message
+        email
+        timestamp
+        createdAt
+        updatedAt
+        __typename
+      }
+      createdAt
+      updatedAt
+      chatReactionsId
+      __typename
+    }
+  }
+`;
+export const listReactions = /* GraphQL */ `
+  query ListReactions(
+    $filter: ModelReactionFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    listReactions(filter: $filter, limit: $limit, nextToken: $nextToken) {
+      items {
+        id
+        emoji
+        count
+        createdAt
+        updatedAt
+        chatReactionsId
         __typename
       }
       nextToken

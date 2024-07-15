@@ -23,23 +23,23 @@ export default function ChatCreateForm(props) {
     ...rest
   } = props;
   const initialValues = {
-    email: "",
     message: "",
+    email: "",
     timestamp: "",
   };
-  const [email, setEmail] = React.useState(initialValues.email);
   const [message, setMessage] = React.useState(initialValues.message);
+  const [email, setEmail] = React.useState(initialValues.email);
   const [timestamp, setTimestamp] = React.useState(initialValues.timestamp);
   const [errors, setErrors] = React.useState({});
   const resetStateValues = () => {
-    setEmail(initialValues.email);
     setMessage(initialValues.message);
+    setEmail(initialValues.email);
     setTimestamp(initialValues.timestamp);
     setErrors({});
   };
   const validations = {
-    email: [{ type: "Required" }],
     message: [{ type: "Required" }],
+    email: [{ type: "Required" }],
     timestamp: [{ type: "Required" }],
   };
   const runValidationTasks = async (
@@ -85,8 +85,8 @@ export default function ChatCreateForm(props) {
       onSubmit={async (event) => {
         event.preventDefault();
         let modelFields = {
-          email,
           message,
+          email,
           timestamp,
         };
         const validationResponses = await Promise.all(
@@ -142,32 +142,6 @@ export default function ChatCreateForm(props) {
       {...rest}
     >
       <TextField
-        label="Email"
-        isRequired={true}
-        isReadOnly={false}
-        value={email}
-        onChange={(e) => {
-          let { value } = e.target;
-          if (onChange) {
-            const modelFields = {
-              email: value,
-              message,
-              timestamp,
-            };
-            const result = onChange(modelFields);
-            value = result?.email ?? value;
-          }
-          if (errors.email?.hasError) {
-            runValidationTasks("email", value);
-          }
-          setEmail(value);
-        }}
-        onBlur={() => runValidationTasks("email", email)}
-        errorMessage={errors.email?.errorMessage}
-        hasError={errors.email?.hasError}
-        {...getOverrideProps(overrides, "email")}
-      ></TextField>
-      <TextField
         label="Message"
         isRequired={true}
         isReadOnly={false}
@@ -176,8 +150,8 @@ export default function ChatCreateForm(props) {
           let { value } = e.target;
           if (onChange) {
             const modelFields = {
-              email,
               message: value,
+              email,
               timestamp,
             };
             const result = onChange(modelFields);
@@ -194,6 +168,32 @@ export default function ChatCreateForm(props) {
         {...getOverrideProps(overrides, "message")}
       ></TextField>
       <TextField
+        label="Email"
+        isRequired={true}
+        isReadOnly={false}
+        value={email}
+        onChange={(e) => {
+          let { value } = e.target;
+          if (onChange) {
+            const modelFields = {
+              message,
+              email: value,
+              timestamp,
+            };
+            const result = onChange(modelFields);
+            value = result?.email ?? value;
+          }
+          if (errors.email?.hasError) {
+            runValidationTasks("email", value);
+          }
+          setEmail(value);
+        }}
+        onBlur={() => runValidationTasks("email", email)}
+        errorMessage={errors.email?.errorMessage}
+        hasError={errors.email?.hasError}
+        {...getOverrideProps(overrides, "email")}
+      ></TextField>
+      <TextField
         label="Timestamp"
         isRequired={true}
         isReadOnly={false}
@@ -204,8 +204,8 @@ export default function ChatCreateForm(props) {
             e.target.value === "" ? "" : new Date(e.target.value).toISOString();
           if (onChange) {
             const modelFields = {
-              email,
               message,
+              email,
               timestamp: value,
             };
             const result = onChange(modelFields);
