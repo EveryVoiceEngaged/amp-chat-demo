@@ -283,6 +283,7 @@ export const getUserPresence = /* GraphQL */ `
       id
       email
       status
+      lastActiveTimestamp
       createdAt
       updatedAt
       __typename
@@ -300,6 +301,7 @@ export const listUserPresences = /* GraphQL */ `
         id
         email
         status
+        lastActiveTimestamp
         createdAt
         updatedAt
         __typename

@@ -24,16 +24,19 @@ export declare type ValidationFunction<T> = (value: T, validationResponse: Valid
 export declare type UserPresenceCreateFormInputValues = {
     email?: string;
     status?: string;
+    lastActiveTimestamp?: string;
 };
 export declare type UserPresenceCreateFormValidationValues = {
     email?: ValidationFunction<string>;
     status?: ValidationFunction<string>;
+    lastActiveTimestamp?: ValidationFunction<string>;
 };
 export declare type PrimitiveOverrideProps<T> = Partial<T> & React.DOMAttributes<HTMLDivElement>;
 export declare type UserPresenceCreateFormOverridesProps = {
     UserPresenceCreateFormGrid?: PrimitiveOverrideProps<GridProps>;
     email?: PrimitiveOverrideProps<TextFieldProps>;
     status?: PrimitiveOverrideProps<TextFieldProps>;
+    lastActiveTimestamp?: PrimitiveOverrideProps<TextFieldProps>;
 } & EscapeHatchProps;
 export declare type UserPresenceCreateFormProps = React.PropsWithChildren<{
     overrides?: UserPresenceCreateFormOverridesProps | undefined | null;

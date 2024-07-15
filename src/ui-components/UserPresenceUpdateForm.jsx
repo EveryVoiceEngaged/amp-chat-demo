@@ -27,9 +27,13 @@ export default function UserPresenceUpdateForm(props) {
   const initialValues = {
     email: "",
     status: "",
+    lastActiveTimestamp: "",
   };
   const [email, setEmail] = React.useState(initialValues.email);
   const [status, setStatus] = React.useState(initialValues.status);
+  const [lastActiveTimestamp, setLastActiveTimestamp] = React.useState(
+    initialValues.lastActiveTimestamp
+  );
   const [errors, setErrors] = React.useState({});
   const resetStateValues = () => {
     const cleanValues = userPresenceRecord
@@ -37,6 +41,7 @@ export default function UserPresenceUpdateForm(props) {
       : initialValues;
     setEmail(cleanValues.email);
     setStatus(cleanValues.status);
+    setLastActiveTimestamp(cleanValues.lastActiveTimestamp);
     setErrors({});
   };
   const [userPresenceRecord, setUserPresenceRecord] = React.useState(
@@ -60,6 +65,7 @@ export default function UserPresenceUpdateForm(props) {
   const validations = {
     email: [{ type: "Required" }],
     status: [{ type: "Required" }],
+    lastActiveTimestamp: [{ type: "Required" }],
   };
   const runValidationTasks = async (
     fieldName,
@@ -78,6 +84,23 @@ export default function UserPresenceUpdateForm(props) {
     setErrors((errors) => ({ ...errors, [fieldName]: validationResponse }));
     return validationResponse;
   };
+  const convertToLocal = (date) => {
+    const df = new Intl.DateTimeFormat("default", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      calendar: "iso8601",
+      numberingSystem: "latn",
+      hourCycle: "h23",
+    });
+    const parts = df.formatToParts(date).reduce((acc, part) => {
+      acc[part.type] = part.value;
+      return acc;
+    }, {});
+    return `${parts.year}-${parts.month}-${parts.day}T${parts.hour}:${parts.minute}`;
+  };
   return (
     <Grid
       as="form"
@@ -89,6 +112,7 @@ export default function UserPresenceUpdateForm(props) {
         let modelFields = {
           email,
           status,
+          lastActiveTimestamp,
         };
         const validationResponses = await Promise.all(
           Object.keys(validations).reduce((promises, fieldName) => {
@@ -151,6 +175,7 @@ export default function UserPresenceUpdateForm(props) {
             const modelFields = {
               email: value,
               status,
+              lastActiveTimestamp,
             };
             const result = onChange(modelFields);
             value = result?.email ?? value;
@@ -176,6 +201,7 @@ export default function UserPresenceUpdateForm(props) {
             const modelFields = {
               email,
               status: value,
+              lastActiveTimestamp,
             };
             const result = onChange(modelFields);
             value = result?.status ?? value;
@@ -189,6 +215,38 @@ export default function UserPresenceUpdateForm(props) {
         errorMessage={errors.status?.errorMessage}
         hasError={errors.status?.hasError}
         {...getOverrideProps(overrides, "status")}
+      ></TextField>
+      <TextField
+        label="Last active timestamp"
+        isRequired={true}
+        isReadOnly={false}
+        type="datetime-local"
+        value={
+          lastActiveTimestamp && convertToLocal(new Date(lastActiveTimestamp))
+        }
+        onChange={(e) => {
+          let value =
+            e.target.value === "" ? "" : new Date(e.target.value).toISOString();
+          if (onChange) {
+            const modelFields = {
+              email,
+              status,
+              lastActiveTimestamp: value,
+            };
+            const result = onChange(modelFields);
+            value = result?.lastActiveTimestamp ?? value;
+          }
+          if (errors.lastActiveTimestamp?.hasError) {
+            runValidationTasks("lastActiveTimestamp", value);
+          }
+          setLastActiveTimestamp(value);
+        }}
+        onBlur={() =>
+          runValidationTasks("lastActiveTimestamp", lastActiveTimestamp)
+        }
+        errorMessage={errors.lastActiveTimestamp?.errorMessage}
+        hasError={errors.lastActiveTimestamp?.hasError}
+        {...getOverrideProps(overrides, "lastActiveTimestamp")}
       ></TextField>
       <Flex
         justifyContent="space-between"

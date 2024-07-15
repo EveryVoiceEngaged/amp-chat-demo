@@ -113,5 +113,7 @@ type UserPresence @model @auth(rules: [{ allow: public }]) {
   id: ID!
   email: String!
   status: String!
+  lastActiveTimestamp: AWSDateTime!
 }
+
 

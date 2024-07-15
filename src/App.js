@@ -34,39 +34,18 @@ function App({ signOut, user }) {
     try {
       console.log(`Updating presence for ${userEmail} to ${status}`);
       
-      // First, try to get the existing user presence
-      const getUserPresence = await client.graphql({
-        query: queries.getUserPresence,
-        variables: { id: userEmail }
+      const response = await client.graphql({
+        query: mutations.updateUserPresence,
+        variables: {
+          input: {
+            id: userEmail,
+            email: userEmail,
+            status: status,
+            lastActiveTimestamp: new Date().toISOString()
+          }
+        }
       });
-  
-      if (getUserPresence.data.getUserPresence) {
-        // If the user presence exists, update it
-        const response = await client.graphql({
-          query: mutations.updateUserPresence,
-          variables: {
-            input: {
-              id: userEmail,
-              email: userEmail,
-              status: status
-            }
-          }
-        });
-        console.log('User presence updated:', response);
-      } else {
-        // If the user presence doesn't exist, create it
-        const response = await client.graphql({
-          query: mutations.createUserPresence,
-          variables: {
-            input: {
-              id: userEmail,
-              email: userEmail,
-              status: status
-            }
-          }
-        });
-        console.log('User presence created:', response);
-      }
+      console.log('User presence updated:', response);
     } catch (error) {
       console.error('Error updating user presence:', error);
       console.error('Error details:', JSON.stringify(error, null, 2));
@@ -93,7 +72,13 @@ function App({ signOut, user }) {
       const presenceData = await client.graphql({
         query: queries.listUserPresences
       });
-      setPresentUsers(presenceData.data.listUserPresences.items.filter(u => u.status === 'online'));
+      const currentTime = new Date();
+      const activeUsers = presenceData.data.listUserPresences.items.filter(u => {
+        const lastActiveTime = new Date(u.lastActiveTimestamp);
+        const timeDifference = currentTime - lastActiveTime;
+        return u.status === 'online' && timeDifference < 60000; // 60 seconds
+      });
+      setPresentUsers(activeUsers);
     } catch (error) {
       console.error('Error fetching user presence:', error);
     }
@@ -104,6 +89,11 @@ function App({ signOut, user }) {
     fetchUserPresence();
     updateUserPresence();
     
+    const intervalId = setInterval(() => {
+      updateUserPresence();
+      fetchUserPresence();
+    }, 30000); // Update every 30 seconds
+
     const chatSub = client.graphql({
       query: subscriptions.onCreateChat
     }).subscribe({
@@ -122,7 +112,10 @@ function App({ signOut, user }) {
         if (data.onUpdateUserPresence) {
           setPresentUsers((prev) => {
             const updatedUsers = prev.filter(u => u.email !== data.onUpdateUserPresence.email);
-            if (data.onUpdateUserPresence.status === 'online') {
+            const lastActiveTime = new Date(data.onUpdateUserPresence.lastActiveTimestamp);
+            const currentTime = new Date();
+            const timeDifference = currentTime - lastActiveTime;
+            if (data.onUpdateUserPresence.status === 'online' && timeDifference < 60000) {
               return [...updatedUsers, data.onUpdateUserPresence];
             }
             return updatedUsers;
@@ -132,10 +125,18 @@ function App({ signOut, user }) {
       error: (err) => console.error(err)
     });
 
+    const handleBeforeUnload = () => {
+      updateUserPresence('offline');
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
     return () => {
+      clearInterval(intervalId);
       chatSub.unsubscribe();
       presenceSub.unsubscribe();
       updateUserPresence('offline');
+      window.removeEventListener('beforeunload', handleBeforeUnload);
     };
   }, [updateUserPresence, fetchChats, fetchUserPresence]);
 

@@ -513,6 +513,7 @@ export const onCreateUserPresence = /* GraphQL */ `
       id
       email
       status
+      lastActiveTimestamp
       createdAt
       updatedAt
       __typename
@@ -527,6 +528,7 @@ export const onUpdateUserPresence = /* GraphQL */ `
       id
       email
       status
+      lastActiveTimestamp
       createdAt
       updatedAt
       __typename
@@ -541,6 +543,7 @@ export const onDeleteUserPresence = /* GraphQL */ `
       id
       email
       status
+      lastActiveTimestamp
       createdAt
       updatedAt
       __typename
