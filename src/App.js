@@ -130,6 +130,17 @@ function App({ signOut, user }) {
       error: (err) => console.error(err)
     });
 
+    const deleteChatSub = client.graphql({
+      query: subscriptions.onDeleteChat
+    }).subscribe({
+      next: ({ data }) => {
+        if (data.onDeleteChat) {
+          setChats((prev) => prev.filter(chat => chat.id !== data.onDeleteChat.id));
+        }
+      },
+      error: (err) => console.error(err)
+    });
+
     const presenceSub = client.graphql({
       query: subscriptions.onUpdateUserPresence
     }).subscribe({
@@ -159,6 +170,7 @@ function App({ signOut, user }) {
     return () => {
       clearInterval(intervalId);
       chatSub.unsubscribe();
+      deleteChatSub.unsubscribe();
       presenceSub.unsubscribe();
       updateUserPresence('offline');
       window.removeEventListener('beforeunload', handleBeforeUnload);
@@ -199,7 +211,8 @@ function App({ signOut, user }) {
           },
         },
       });
-      setChats(chats.filter(chat => chat.id !== chatId));
+      // We don't need to update the local state here anymore
+      // as it will be updated by the subscription
     } catch (error) {
       console.error('Error deleting chat:', error);
     }
