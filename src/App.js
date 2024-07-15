@@ -76,7 +76,7 @@ function App({ signOut, user }) {
       const activeUsers = presenceData.data.listUserPresences.items.filter(u => {
         const lastActiveTime = new Date(u.lastActiveTimestamp);
         const timeDifference = currentTime - lastActiveTime;
-        return u.status === 'online' && timeDifference < 60000; // 60 seconds
+        return u.status === 'online' && timeDifference < 5000; // 5 seconds
       });
       setPresentUsers(activeUsers);
     } catch (error) {
@@ -92,7 +92,7 @@ function App({ signOut, user }) {
     const intervalId = setInterval(() => {
       updateUserPresence();
       fetchUserPresence();
-    }, 30000); // Update every 30 seconds
+    }, 5000); // Update every 5 seconds
 
     const chatSub = client.graphql({
       query: subscriptions.onCreateChat
@@ -115,7 +115,7 @@ function App({ signOut, user }) {
             const lastActiveTime = new Date(data.onUpdateUserPresence.lastActiveTimestamp);
             const currentTime = new Date();
             const timeDifference = currentTime - lastActiveTime;
-            if (data.onUpdateUserPresence.status === 'online' && timeDifference < 60000) {
+            if (data.onUpdateUserPresence.status === 'online' && timeDifference < 5000) {
               return [...updatedUsers, data.onUpdateUserPresence];
             }
             return updatedUsers;
