@@ -29,23 +29,48 @@ function App({ signOut, user }) {
   const [chats, setChats] = useState([]);
   const [presentUsers, setPresentUsers] = useState([]);
   const messagesEndRef = useRef(null);
-
+  
   const updateUserPresence = useCallback(async (status = 'online') => {
     try {
       console.log(`Updating presence for ${userEmail} to ${status}`);
       
-      const response = await client.graphql({
-        query: mutations.updateUserPresence,
-        variables: {
-          input: {
-            id: userEmail,
-            email: userEmail,
-            status: status,
-            lastActiveTimestamp: new Date().toISOString()
-          }
-        }
+      // First, try to get the existing user presence
+      const getUserPresence = await client.graphql({
+        query: queries.getUserPresence,
+        variables: { id: userEmail }
       });
-      console.log('User presence updated:', response);
+  
+      const currentTimestamp = new Date().toISOString();
+  
+      if (getUserPresence.data.getUserPresence) {
+        // If the user presence exists, update it
+        const response = await client.graphql({
+          query: mutations.updateUserPresence,
+          variables: {
+            input: {
+              id: userEmail,
+              email: userEmail,
+              status: status,
+              lastActiveTimestamp: currentTimestamp
+            }
+          }
+        });
+        console.log('User presence updated:', response);
+      } else {
+        // If the user presence doesn't exist, create it
+        const response = await client.graphql({
+          query: mutations.createUserPresence,
+          variables: {
+            input: {
+              id: userEmail,
+              email: userEmail,
+              status: status,
+              lastActiveTimestamp: currentTimestamp
+            }
+          }
+        });
+        console.log('User presence created:', response);
+      }
     } catch (error) {
       console.error('Error updating user presence:', error);
       console.error('Error details:', JSON.stringify(error, null, 2));
