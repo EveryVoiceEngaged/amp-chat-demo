@@ -5,7 +5,7 @@ export default defineStorage({
   access: (allow) => ({
     "attachments/*": [
       allow.guest.to(["read"]),
-      allow.entity("identity").to(["read", "create", "update"])
+      allow.authenticated.to(["read", "create", "update"])
     ]
   })
 });
