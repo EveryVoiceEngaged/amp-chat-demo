@@ -275,7 +275,7 @@ function App({ signOut, user }) {
               message: e.target.value.trim(),
               email: userEmail,
               timestamp: new Date().toISOString(),
-              attachment: attachmentData.path,
+              attachment: attachmentData?.path,
               attachmentType: attachmentType
             },
           },
