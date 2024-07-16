@@ -351,7 +351,7 @@ function App({ signOut, user }) {
     input.accept = "image/*, video/*, audio/*";
     input.onchange = async (e) => {
       const file = e.target.files[0];
-      setAttachment(fileData);
+      setAttachment(file);
     };
     input.click();
   };
