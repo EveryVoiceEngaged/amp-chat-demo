@@ -140,6 +140,7 @@ export const onCreateScheduledForum = /* GraphQL */ `
       id
       createdAt
       updatedAt
+      scheduledForumIssueGuideId
       __typename
     }
   }
@@ -196,6 +197,7 @@ export const onUpdateScheduledForum = /* GraphQL */ `
       id
       createdAt
       updatedAt
+      scheduledForumIssueGuideId
       __typename
     }
   }
@@ -252,6 +254,7 @@ export const onDeleteScheduledForum = /* GraphQL */ `
       id
       createdAt
       updatedAt
+      scheduledForumIssueGuideId
       __typename
     }
   }
@@ -310,6 +313,7 @@ export const onCreateGala = /* GraphQL */ `
       id
       createdAt
       updatedAt
+      galaIssueGuideId
       __typename
     }
   }
@@ -368,6 +372,7 @@ export const onUpdateGala = /* GraphQL */ `
       id
       createdAt
       updatedAt
+      galaIssueGuideId
       __typename
     }
   }
@@ -426,6 +431,7 @@ export const onDeleteGala = /* GraphQL */ `
       id
       createdAt
       updatedAt
+      galaIssueGuideId
       __typename
     }
   }

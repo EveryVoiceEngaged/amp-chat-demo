@@ -99,6 +99,7 @@ export const getScheduledForum = /* GraphQL */ `
       id
       createdAt
       updatedAt
+      scheduledForumIssueGuideId
       __typename
     }
   }
@@ -129,6 +130,7 @@ export const listScheduledForums = /* GraphQL */ `
         id
         createdAt
         updatedAt
+        scheduledForumIssueGuideId
         __typename
       }
       nextToken
@@ -190,6 +192,7 @@ export const getGala = /* GraphQL */ `
       id
       createdAt
       updatedAt
+      galaIssueGuideId
       __typename
     }
   }
@@ -224,6 +227,7 @@ export const listGalas = /* GraphQL */ `
         id
         createdAt
         updatedAt
+        galaIssueGuideId
         __typename
       }
       nextToken

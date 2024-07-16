@@ -32,6 +32,7 @@ function App({ signOut, user }) {
   const messagesEndRef = useRef(null);
   const [attachDetachText, setAttachDetachText] = useState("Attach");
   const [attachment, setAttachment] = useState(null);
+  const [attachmentType, setAttachmentType] = useState(null);
   const [attachmentUrl, setAttachmentUrl] = useState(null);
   
   const updateUserPresence = useCallback(async (status = 'online') => {
@@ -253,7 +254,6 @@ function App({ signOut, user }) {
         let attachmentData = null;
         let attachmentType = null;
         if (attachment !== null) {
-          attachmentType = attachment.type.split('/')[0];
           const attachmentKey = `/attachments/${new Date().getTime()}-${attachment.name}`;
           attachmentData = await uploadData({
             path: attachmentKey,
@@ -263,6 +263,7 @@ function App({ signOut, user }) {
             }
           });
           setAttachment(null);
+          setAttachmentType(null);
           setAttachDetachText("Attach");
           URL.revokeObjectURL(attachmentUrl);
           setAttachmentUrl(null);
@@ -359,12 +360,14 @@ function App({ signOut, user }) {
         const file = e.target.files[0];
         setAttachDetachText("Remove");
         setAttachment(file);
+        setAttachmentType(file.type.split("/")[0]);
         setAttachmentUrl(URL.createObjectURL(file));
       };
       input.click();
     } else {
       setAttachDetachText("Attach");
       setAttachment(null);
+      setAttachmentType(null);
       URL.revokeObjectURL(attachmentUrl);
       setAttachmentUrl(null);
     }
@@ -455,11 +458,13 @@ function App({ signOut, user }) {
               attachment ? (
                 <div>
                   <p>{attachment.name}</p>
-                  (attachment) ? (
-                    attachmentType === "image" ? <img src={attachmentUrl} alt="attachment" className="w-1/8" /> :
-                    attachmentType === "video" ? <video src={attachmentUrl} controls className="w-1/8" /> :
-                    attachmentType === "audio" ? <audio src={attachmentUrl} controls className="w-1/8" /> : null
-                  ) : null
+                  {
+                    (attachment) ? (
+                      attachmentType === "image" ? <img src={attachmentUrl} alt="attachment" className="w-1/8" /> :
+                      attachmentType === "video" ? <video src={attachmentUrl} controls className="w-1/8" /> :
+                      attachmentType === "audio" ? <audio src={attachmentUrl} controls className="w-1/8" /> : null
+                    ) : null
+                  }
                 </div>
               ) : null
             }
