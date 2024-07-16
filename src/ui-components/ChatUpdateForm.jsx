@@ -28,10 +28,16 @@ export default function ChatUpdateForm(props) {
     message: "",
     email: "",
     timestamp: "",
+    attachment: "",
+    attachmentType: "",
   };
   const [message, setMessage] = React.useState(initialValues.message);
   const [email, setEmail] = React.useState(initialValues.email);
   const [timestamp, setTimestamp] = React.useState(initialValues.timestamp);
+  const [attachment, setAttachment] = React.useState(initialValues.attachment);
+  const [attachmentType, setAttachmentType] = React.useState(
+    initialValues.attachmentType
+  );
   const [errors, setErrors] = React.useState({});
   const resetStateValues = () => {
     const cleanValues = chatRecord
@@ -40,6 +46,8 @@ export default function ChatUpdateForm(props) {
     setMessage(cleanValues.message);
     setEmail(cleanValues.email);
     setTimestamp(cleanValues.timestamp);
+    setAttachment(cleanValues.attachment);
+    setAttachmentType(cleanValues.attachmentType);
     setErrors({});
   };
   const [chatRecord, setChatRecord] = React.useState(chatModelProp);
@@ -62,6 +70,8 @@ export default function ChatUpdateForm(props) {
     message: [{ type: "Required" }],
     email: [{ type: "Required" }],
     timestamp: [{ type: "Required" }],
+    attachment: [],
+    attachmentType: [],
   };
   const runValidationTasks = async (
     fieldName,
@@ -109,6 +119,8 @@ export default function ChatUpdateForm(props) {
           message,
           email,
           timestamp,
+          attachment: attachment ?? null,
+          attachmentType: attachmentType ?? null,
         };
         const validationResponses = await Promise.all(
           Object.keys(validations).reduce((promises, fieldName) => {
@@ -172,6 +184,8 @@ export default function ChatUpdateForm(props) {
               message: value,
               email,
               timestamp,
+              attachment,
+              attachmentType,
             };
             const result = onChange(modelFields);
             value = result?.message ?? value;
@@ -198,6 +212,8 @@ export default function ChatUpdateForm(props) {
               message,
               email: value,
               timestamp,
+              attachment,
+              attachmentType,
             };
             const result = onChange(modelFields);
             value = result?.email ?? value;
@@ -226,6 +242,8 @@ export default function ChatUpdateForm(props) {
               message,
               email,
               timestamp: value,
+              attachment,
+              attachmentType,
             };
             const result = onChange(modelFields);
             value = result?.timestamp ?? value;
@@ -239,6 +257,62 @@ export default function ChatUpdateForm(props) {
         errorMessage={errors.timestamp?.errorMessage}
         hasError={errors.timestamp?.hasError}
         {...getOverrideProps(overrides, "timestamp")}
+      ></TextField>
+      <TextField
+        label="Attachment"
+        isRequired={false}
+        isReadOnly={false}
+        value={attachment}
+        onChange={(e) => {
+          let { value } = e.target;
+          if (onChange) {
+            const modelFields = {
+              message,
+              email,
+              timestamp,
+              attachment: value,
+              attachmentType,
+            };
+            const result = onChange(modelFields);
+            value = result?.attachment ?? value;
+          }
+          if (errors.attachment?.hasError) {
+            runValidationTasks("attachment", value);
+          }
+          setAttachment(value);
+        }}
+        onBlur={() => runValidationTasks("attachment", attachment)}
+        errorMessage={errors.attachment?.errorMessage}
+        hasError={errors.attachment?.hasError}
+        {...getOverrideProps(overrides, "attachment")}
+      ></TextField>
+      <TextField
+        label="Attachment type"
+        isRequired={false}
+        isReadOnly={false}
+        value={attachmentType}
+        onChange={(e) => {
+          let { value } = e.target;
+          if (onChange) {
+            const modelFields = {
+              message,
+              email,
+              timestamp,
+              attachment,
+              attachmentType: value,
+            };
+            const result = onChange(modelFields);
+            value = result?.attachmentType ?? value;
+          }
+          if (errors.attachmentType?.hasError) {
+            runValidationTasks("attachmentType", value);
+          }
+          setAttachmentType(value);
+        }}
+        onBlur={() => runValidationTasks("attachmentType", attachmentType)}
+        errorMessage={errors.attachmentType?.errorMessage}
+        hasError={errors.attachmentType?.hasError}
+        {...getOverrideProps(overrides, "attachmentType")}
       ></TextField>
       <Flex
         justifyContent="space-between"

@@ -25,11 +25,15 @@ export declare type ChatCreateFormInputValues = {
     message?: string;
     email?: string;
     timestamp?: string;
+    attachment?: string;
+    attachmentType?: string;
 };
 export declare type ChatCreateFormValidationValues = {
     message?: ValidationFunction<string>;
     email?: ValidationFunction<string>;
     timestamp?: ValidationFunction<string>;
+    attachment?: ValidationFunction<string>;
+    attachmentType?: ValidationFunction<string>;
 };
 export declare type PrimitiveOverrideProps<T> = Partial<T> & React.DOMAttributes<HTMLDivElement>;
 export declare type ChatCreateFormOverridesProps = {
@@ -37,6 +41,8 @@ export declare type ChatCreateFormOverridesProps = {
     message?: PrimitiveOverrideProps<TextFieldProps>;
     email?: PrimitiveOverrideProps<TextFieldProps>;
     timestamp?: PrimitiveOverrideProps<TextFieldProps>;
+    attachment?: PrimitiveOverrideProps<TextFieldProps>;
+    attachmentType?: PrimitiveOverrideProps<TextFieldProps>;
 } & EscapeHatchProps;
 export declare type ChatCreateFormProps = React.PropsWithChildren<{
     overrides?: ChatCreateFormOverridesProps | undefined | null;
