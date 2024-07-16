@@ -46,7 +46,7 @@ type Drawback {
 type ScheduledForum @model @auth(rules: [{allow: public}]) {
   forumId: String!
   joinId: String!
-  issueGuide: IssueGuide! @hasMany
+  issueGuide: IssueGuide! @hasOne
   title: String!
   startDate: AWSDateTime!
   moderator: String!
@@ -68,7 +68,7 @@ type ScheduledForum @model @auth(rules: [{allow: public}]) {
 type Gala @model @auth(rules: [{allow: public}]) {
   forumId: String!
   joinId: String!
-  issueGuide: IssueGuide! @hasMany
+  issueGuide: IssueGuide! @hasOne
   title: String!
   startDate: AWSDateTime!
   endDate: AWSDateTime!
