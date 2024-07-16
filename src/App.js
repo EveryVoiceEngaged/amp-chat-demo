@@ -386,9 +386,9 @@ function App({ signOut, user }) {
             </div>
             {
               (chat.attachment) ? (
-                chat.attachmentType === "image" ? <img src={chat.attachment} alt="attachment" className="w-1/2" /> :
-                chat.attachmentType === "video" ? <video src={chat.attachment} controls className="w-1/2" /> :
-                chat.attachmentType === "audio" ? <audio src={chat.attachment} controls className="w-1/2" /> : null
+                chat.attachmentType === "image" ? <img src={chat.attachment} alt="attachment" class="attachment" /> :
+                chat.attachmentType === "video" ? <video src={chat.attachment} controls class="attachment" /> :
+                chat.attachmentType === "audio" ? <audio src={chat.attachment} controls /> : null
               ) : null
             }
             <div className="flex mt-1">
@@ -460,9 +460,9 @@ function App({ signOut, user }) {
                   <p>{attachment.name}</p>
                   {
                     (attachment) ? (
-                      attachmentType === "image" ? <img src={attachmentUrl} alt="attachment" className="w-1/8" /> :
-                      attachmentType === "video" ? <video src={attachmentUrl} controls className="w-1/8" /> :
-                      attachmentType === "audio" ? <audio src={attachmentUrl} controls className="w-1/8" /> : null
+                      attachmentType === "image" ? <img src={attachmentUrl} alt="attachment" class="attachment" /> :
+                      attachmentType === "video" ? <video src={attachmentUrl} controls class="attachment" /> :
+                      attachmentType === "audio" ? <audio src={attachmentUrl} controls /> : null
                     ) : null
                   }
                 </div>
