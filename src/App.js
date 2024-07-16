@@ -6,6 +6,7 @@ import { generateClient } from 'aws-amplify/api';
 import * as mutations from "./graphql/mutations";
 import * as subscriptions from "./graphql/subscriptions";
 import * as queries from "./graphql/queries";
+import { uploadData } from "aws-amplify/storage";
 
 const client = generateClient();
 
@@ -29,6 +30,7 @@ function App({ signOut, user }) {
   const [chats, setChats] = useState([]);
   const [presentUsers, setPresentUsers] = useState([]);
   const messagesEndRef = useRef(null);
+  const [attachment, setAttachment] = useState(null);
   
   const updateUserPresence = useCallback(async (status = 'online') => {
     try {
@@ -246,13 +248,29 @@ function App({ signOut, user }) {
   const handleKeyUp = async (e) => {
     if (e.key === "Enter" && e.target.value.trim()) {
       try {
+        let attachmentData = null;
+        let attachmentType = null;
+        if (attachment !== null) {
+          attachmentType = attachment.type.split('/')[0];
+          const attachmentKey = `/attachments/${new Date().getTime()}-${attachment.name}`;
+          attachmentData = await uploadData({
+            path: attachmentKey,
+            data: await attachment.arrayBuffer(),
+            options: {
+              contentType: attachment.type
+            }
+          });
+          setAttachment(null);
+        }
         const newChat = await client.graphql({
           query: mutations.createChat,
           variables: {
             input: {
               message: e.target.value.trim(),
               email: userEmail,
-              timestamp: new Date().toISOString()
+              timestamp: new Date().toISOString(),
+              attachment: attachmentData.path,
+              attachmentType: attachmentType
             },
           },
         });
@@ -327,6 +345,17 @@ function App({ signOut, user }) {
     }
   };
 
+  const openFileDialog = async () => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "image/*, video/*, audio/*";
+    input.onchange = async (e) => {
+      const file = e.target.files[0];
+      setAttachment(fileData);
+    };
+    input.click();
+  };
+
   const ChatMessage = ({ chat, handleDelete, handleReaction }) => {
     const emojis = ['👍', '❤️', '😂'];
   
@@ -338,6 +367,13 @@ function App({ signOut, user }) {
               <strong className="mr-2">{chat.email}:</strong>
               <span>{chat.message}</span>
             </div>
+            {
+              (chat.attachment) ? (
+                chat.attachmentType === "image" ? <img src={chat.attachment} alt="attachment" className="w-1/2" /> :
+                chat.attachmentType === "video" ? <video src={chat.attachment} controls className="w-1/2" /> :
+                chat.attachmentType === "audio" ? <audio src={chat.attachment} controls className="w-1/2" /> : null
+              ) : null
+            }
             <div className="flex mt-1">
               {emojis.map((emoji) => {
                 const reaction = chat.reactions.find(r => r.emoji === emoji);
@@ -400,6 +436,7 @@ function App({ signOut, user }) {
             <div ref={messagesEndRef} />
           </div>
           <div className="relative">
+			      <button onClick={openFileDialog}>Attach</button>
             <input
               type="text"
               name="search"
