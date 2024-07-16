@@ -1,0 +1,13 @@
+{
+  "resourceName": "attachments",
+  "policyUUID": "d2b96d9f",
+  "bucketName": "attachments",
+  "storageAccess": "auth",
+  "guestAccess": [],
+  "authAccess": [
+    "CREATE_AND_UPDATE",
+    "READ"
+  ],
+  "triggerFunction": "NONE",
+  "groupAccess": {}
+}

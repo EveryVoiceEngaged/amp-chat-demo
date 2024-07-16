@@ -30,7 +30,9 @@ function App({ signOut, user }) {
   const [chats, setChats] = useState([]);
   const [presentUsers, setPresentUsers] = useState([]);
   const messagesEndRef = useRef(null);
+  const [attachDetachText, setAttachDetachText] = useState("Attach");
   const [attachment, setAttachment] = useState(null);
+  const [attachmentUrl, setAttachmentUrl] = useState(null);
   
   const updateUserPresence = useCallback(async (status = 'online') => {
     try {
@@ -261,6 +263,9 @@ function App({ signOut, user }) {
             }
           });
           setAttachment(null);
+          setAttachDetachText("Attach");
+          URL.revokeObjectURL(attachmentUrl);
+          setAttachmentUrl(null);
         }
         const newChat = await client.graphql({
           query: mutations.createChat,
@@ -346,14 +351,23 @@ function App({ signOut, user }) {
   };
 
   const openFileDialog = async () => {
-    const input = document.createElement("input");
-    input.type = "file";
-    input.accept = "image/*, video/*, audio/*";
-    input.onchange = async (e) => {
-      const file = e.target.files[0];
-      setAttachment(file);
-    };
-    input.click();
+    if (attachment === null) {
+      const input = document.createElement("input");
+      input.type = "file";
+      input.accept = "image/*, video/*, audio/*";
+      input.onchange = async (e) => {
+        const file = e.target.files[0];
+        setAttachDetachText("Remove");
+        setAttachment(file);
+        setAttachmentUrl(URL.createObjectURL(file));
+      };
+      input.click();
+    } else {
+      setAttachDetachText("Attach");
+      setAttachment(null);
+      URL.revokeObjectURL(attachmentUrl);
+      setAttachmentUrl(null);
+    }
   };
 
   const ChatMessage = ({ chat, handleDelete, handleReaction }) => {
@@ -436,7 +450,19 @@ function App({ signOut, user }) {
             <div ref={messagesEndRef} />
           </div>
           <div className="relative">
-			      <button onClick={openFileDialog}>Attach</button>
+			      <button onClick={openFileDialog}>{attachDetachText}</button>
+            {
+              attachment ? (
+                <div>
+                  <p>{attachment.name}</p>
+                  (attachment) ? (
+                    attachmentType === "image" ? <img src={attachmentUrl} alt="attachment" className="w-1/8" /> :
+                    attachmentType === "video" ? <video src={attachmentUrl} controls className="w-1/8" /> :
+                    attachmentType === "audio" ? <audio src={attachmentUrl} controls className="w-1/8" /> : null
+                  ) : null
+                </div>
+              ) : null
+            }
             <input
               type="text"
               name="search"
