@@ -86,6 +86,8 @@ export const getScheduledForum = /* GraphQL */ `
         message
         email
         timestamp
+        attachment
+        attachmentType
         createdAt
         updatedAt
         __typename
@@ -179,6 +181,8 @@ export const getGala = /* GraphQL */ `
         message
         email
         timestamp
+        attachment
+        attachmentType
         createdAt
         updatedAt
         __typename
@@ -246,6 +250,8 @@ export const getChat = /* GraphQL */ `
         nextToken
         __typename
       }
+      attachment
+      attachmentType
       createdAt
       updatedAt
       __typename
@@ -264,6 +270,8 @@ export const listChats = /* GraphQL */ `
         message
         email
         timestamp
+        attachment
+        attachmentType
         createdAt
         updatedAt
         __typename
@@ -284,6 +292,8 @@ export const getReaction = /* GraphQL */ `
         message
         email
         timestamp
+        attachment
+        attachmentType
         createdAt
         updatedAt
         __typename

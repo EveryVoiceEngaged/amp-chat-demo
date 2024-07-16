@@ -131,6 +131,8 @@ export const createScheduledForum = /* GraphQL */ `
         message
         email
         timestamp
+        attachment
+        attachmentType
         createdAt
         updatedAt
         __typename
@@ -189,6 +191,8 @@ export const updateScheduledForum = /* GraphQL */ `
         message
         email
         timestamp
+        attachment
+        attachmentType
         createdAt
         updatedAt
         __typename
@@ -247,6 +251,8 @@ export const deleteScheduledForum = /* GraphQL */ `
         message
         email
         timestamp
+        attachment
+        attachmentType
         createdAt
         updatedAt
         __typename
@@ -309,6 +315,8 @@ export const createGala = /* GraphQL */ `
         message
         email
         timestamp
+        attachment
+        attachmentType
         createdAt
         updatedAt
         __typename
@@ -371,6 +379,8 @@ export const updateGala = /* GraphQL */ `
         message
         email
         timestamp
+        attachment
+        attachmentType
         createdAt
         updatedAt
         __typename
@@ -433,6 +443,8 @@ export const deleteGala = /* GraphQL */ `
         message
         email
         timestamp
+        attachment
+        attachmentType
         createdAt
         updatedAt
         __typename
@@ -465,6 +477,8 @@ export const createChat = /* GraphQL */ `
         nextToken
         __typename
       }
+      attachment
+      attachmentType
       createdAt
       updatedAt
       __typename
@@ -485,6 +499,8 @@ export const updateChat = /* GraphQL */ `
         nextToken
         __typename
       }
+      attachment
+      attachmentType
       createdAt
       updatedAt
       __typename
@@ -505,6 +521,8 @@ export const deleteChat = /* GraphQL */ `
         nextToken
         __typename
       }
+      attachment
+      attachmentType
       createdAt
       updatedAt
       __typename
@@ -525,6 +543,8 @@ export const createReaction = /* GraphQL */ `
         message
         email
         timestamp
+        attachment
+        attachmentType
         createdAt
         updatedAt
         __typename
@@ -550,6 +570,8 @@ export const updateReaction = /* GraphQL */ `
         message
         email
         timestamp
+        attachment
+        attachmentType
         createdAt
         updatedAt
         __typename
@@ -575,6 +597,8 @@ export const deleteReaction = /* GraphQL */ `
         message
         email
         timestamp
+        attachment
+        attachmentType
         createdAt
         updatedAt
         __typename
