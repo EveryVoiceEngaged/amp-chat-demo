@@ -254,7 +254,7 @@ function App({ signOut, user }) {
         let attachmentData = null;
         let attachmentType = null;
         if (attachment !== null) {
-          const attachmentKey = `/attachments/${new Date().getTime()}-${attachment.name}`;
+          const attachmentKey = `attachments/${new Date().getTime()}-${attachment.name}`;
           attachmentData = await uploadData({
             path: attachmentKey,
             data: await attachment.arrayBuffer(),
