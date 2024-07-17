@@ -5,7 +5,7 @@
  **************************************************************************/
 
 import * as React from "react";
-import { GridProps, TextFieldProps } from "@aws-amplify/ui-react";
+import { GridProps, SwitchFieldProps, TextFieldProps } from "@aws-amplify/ui-react";
 export declare type EscapeHatchProps = {
     [elementHierarchy: string]: Record<string, unknown>;
 } | null;
@@ -25,11 +25,15 @@ export declare type ChatUpdateFormInputValues = {
     message?: string;
     email?: string;
     timestamp?: string;
+    isPublic?: boolean;
+    recipient?: string;
 };
 export declare type ChatUpdateFormValidationValues = {
     message?: ValidationFunction<string>;
     email?: ValidationFunction<string>;
     timestamp?: ValidationFunction<string>;
+    isPublic?: ValidationFunction<boolean>;
+    recipient?: ValidationFunction<string>;
 };
 export declare type PrimitiveOverrideProps<T> = Partial<T> & React.DOMAttributes<HTMLDivElement>;
 export declare type ChatUpdateFormOverridesProps = {
@@ -37,6 +41,8 @@ export declare type ChatUpdateFormOverridesProps = {
     message?: PrimitiveOverrideProps<TextFieldProps>;
     email?: PrimitiveOverrideProps<TextFieldProps>;
     timestamp?: PrimitiveOverrideProps<TextFieldProps>;
+    isPublic?: PrimitiveOverrideProps<SwitchFieldProps>;
+    recipient?: PrimitiveOverrideProps<TextFieldProps>;
 } & EscapeHatchProps;
 export declare type ChatUpdateFormProps = React.PropsWithChildren<{
     overrides?: ChatUpdateFormOverridesProps | undefined | null;

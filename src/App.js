@@ -280,6 +280,26 @@ function App({ signOut, user }) {
     }
   };
 
+  const handleSendMessage = async (message) => {
+    try {
+      const newChat = await client.graphql({
+        query: mutations.createChat,
+        variables: {
+          input: {
+            message: message.trim(),
+            email: userEmail,
+            timestamp: new Date().toISOString(),
+            isPublic,
+            recipient: isPublic ? null : recipient
+          },
+        },
+      });
+      setChats((prev) => [...prev, {...newChat.data.createChat, reactions: []}]);
+    } catch (error) {
+      console.error('Error creating chat:', error);
+    }
+  };
+
   const handleReaction = async (chatId, emoji) => {
     try {
       const chat = chats.find(c => c.id === chatId);
@@ -387,9 +407,16 @@ function App({ signOut, user }) {
         </button>
       </div>
       <div className="flex-grow flex justify-center items-center p-4">
-        <div className="w-3/4 flex flex-col h-[80vh]">
-          <div className="flex-grow overflow-y-auto mb-4 p-4 border border-gray-300 rounded">
-            {chats.map((chat) => (
+      <div className="w-3/4 flex flex-col h-[80vh]">
+        <div className="flex-grow overflow-y-auto mb-4 p-4 border border-gray-300 rounded">
+          {chats
+            .filter(chat => 
+              isPublic ? chat.isPublic : (!chat.isPublic && 
+                ((chat.email === userEmail && chat.recipient === recipient) || 
+                (chat.email === recipient && chat.recipient === userEmail))
+              )
+            )
+            .map((chat) => (
               <ChatMessage 
                 key={chat.id}
                 chat={chat}
@@ -397,8 +424,38 @@ function App({ signOut, user }) {
                 handleReaction={handleReaction}
               />
             ))}
-            <div ref={messagesEndRef} />
-          </div>
+          <div ref={messagesEndRef} />
+        </div>
+        <div className="relative mb-4">
+          <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="isPublic">
+            Public Message
+          </label>
+          <input
+            type="checkbox"
+            id="isPublic"
+            checked={isPublic}
+            onChange={(e) => setIsPublic(e.target.checked)}
+            className="mr-2 leading-tight"
+          />
+          {!isPublic && (
+            <div>
+              <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="recipient">
+                Recipient
+              </label>
+              <select
+                id="recipient"
+                value={recipient}
+                onChange={(e) => setRecipient(e.target.value)}
+                className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+              >
+                <option value="" disabled>Select a user</option>
+                {presentUsers.map(user => (
+                  <option key={user.email} value={user.email}>{user.email}</option>
+                ))}
+              </select>
+            </div>
+          )}
+        </div>
           <div className="relative">
             <input
               type="text"

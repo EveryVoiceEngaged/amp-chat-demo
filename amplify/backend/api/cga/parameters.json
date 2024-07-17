@@ -2,10 +2,5 @@
   "AppSyncApiName": "cga",
   "DynamoDBBillingMode": "PAY_PER_REQUEST",
   "DynamoDBEnableServerSideEncryption": false,
-  "AuthCognitoUserPoolId": {
-    "Fn::GetAtt": [
-      "authcga",
-      "Outputs.UserPoolId"
-    ]
-  }
+  "AuthModeLastUpdated": "2024-07-17T03:32:14.436Z"
 }

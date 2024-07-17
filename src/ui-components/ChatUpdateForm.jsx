@@ -6,7 +6,13 @@
 
 /* eslint-disable */
 import * as React from "react";
-import { Button, Flex, Grid, TextField } from "@aws-amplify/ui-react";
+import {
+  Button,
+  Flex,
+  Grid,
+  SwitchField,
+  TextField,
+} from "@aws-amplify/ui-react";
 import { fetchByPath, getOverrideProps, validateField } from "./utils";
 import { generateClient } from "aws-amplify/api";
 import { getChat } from "../graphql/queries";
@@ -28,10 +34,14 @@ export default function ChatUpdateForm(props) {
     message: "",
     email: "",
     timestamp: "",
+    isPublic: false,
+    recipient: "",
   };
   const [message, setMessage] = React.useState(initialValues.message);
   const [email, setEmail] = React.useState(initialValues.email);
   const [timestamp, setTimestamp] = React.useState(initialValues.timestamp);
+  const [isPublic, setIsPublic] = React.useState(initialValues.isPublic);
+  const [recipient, setRecipient] = React.useState(initialValues.recipient);
   const [errors, setErrors] = React.useState({});
   const resetStateValues = () => {
     const cleanValues = chatRecord
@@ -40,6 +50,8 @@ export default function ChatUpdateForm(props) {
     setMessage(cleanValues.message);
     setEmail(cleanValues.email);
     setTimestamp(cleanValues.timestamp);
+    setIsPublic(cleanValues.isPublic);
+    setRecipient(cleanValues.recipient);
     setErrors({});
   };
   const [chatRecord, setChatRecord] = React.useState(chatModelProp);
@@ -62,6 +74,8 @@ export default function ChatUpdateForm(props) {
     message: [{ type: "Required" }],
     email: [{ type: "Required" }],
     timestamp: [{ type: "Required" }],
+    isPublic: [{ type: "Required" }],
+    recipient: [],
   };
   const runValidationTasks = async (
     fieldName,
@@ -109,6 +123,8 @@ export default function ChatUpdateForm(props) {
           message,
           email,
           timestamp,
+          isPublic,
+          recipient: recipient ?? null,
         };
         const validationResponses = await Promise.all(
           Object.keys(validations).reduce((promises, fieldName) => {
@@ -172,6 +188,8 @@ export default function ChatUpdateForm(props) {
               message: value,
               email,
               timestamp,
+              isPublic,
+              recipient,
             };
             const result = onChange(modelFields);
             value = result?.message ?? value;
@@ -198,6 +216,8 @@ export default function ChatUpdateForm(props) {
               message,
               email: value,
               timestamp,
+              isPublic,
+              recipient,
             };
             const result = onChange(modelFields);
             value = result?.email ?? value;
@@ -226,6 +246,8 @@ export default function ChatUpdateForm(props) {
               message,
               email,
               timestamp: value,
+              isPublic,
+              recipient,
             };
             const result = onChange(modelFields);
             value = result?.timestamp ?? value;
@@ -239,6 +261,62 @@ export default function ChatUpdateForm(props) {
         errorMessage={errors.timestamp?.errorMessage}
         hasError={errors.timestamp?.hasError}
         {...getOverrideProps(overrides, "timestamp")}
+      ></TextField>
+      <SwitchField
+        label="Is public"
+        defaultChecked={false}
+        isDisabled={false}
+        isChecked={isPublic}
+        onChange={(e) => {
+          let value = e.target.checked;
+          if (onChange) {
+            const modelFields = {
+              message,
+              email,
+              timestamp,
+              isPublic: value,
+              recipient,
+            };
+            const result = onChange(modelFields);
+            value = result?.isPublic ?? value;
+          }
+          if (errors.isPublic?.hasError) {
+            runValidationTasks("isPublic", value);
+          }
+          setIsPublic(value);
+        }}
+        onBlur={() => runValidationTasks("isPublic", isPublic)}
+        errorMessage={errors.isPublic?.errorMessage}
+        hasError={errors.isPublic?.hasError}
+        {...getOverrideProps(overrides, "isPublic")}
+      ></SwitchField>
+      <TextField
+        label="Recipient"
+        isRequired={false}
+        isReadOnly={false}
+        value={recipient}
+        onChange={(e) => {
+          let { value } = e.target;
+          if (onChange) {
+            const modelFields = {
+              message,
+              email,
+              timestamp,
+              isPublic,
+              recipient: value,
+            };
+            const result = onChange(modelFields);
+            value = result?.recipient ?? value;
+          }
+          if (errors.recipient?.hasError) {
+            runValidationTasks("recipient", value);
+          }
+          setRecipient(value);
+        }}
+        onBlur={() => runValidationTasks("recipient", recipient)}
+        errorMessage={errors.recipient?.errorMessage}
+        hasError={errors.recipient?.hasError}
+        {...getOverrideProps(overrides, "recipient")}
       ></TextField>
       <Flex
         justifyContent="space-between"
