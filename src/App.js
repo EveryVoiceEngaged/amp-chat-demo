@@ -28,51 +28,54 @@ function App({ signOut, user }) {
   const userEmail = user.signInDetails.loginId;
   const [chats, setChats] = useState([]);
   const [presentUsers, setPresentUsers] = useState([]);
+  const [isPublic, setIsPublic] = useState(true);
+  const [recipient, setRecipient] = useState('');
   const messagesEndRef = useRef(null);
+  const lastActiveRef = useRef(Date.now());
   
   const updateUserPresence = useCallback(async (status = 'online') => {
     try {
       console.log(`Updating presence for ${userEmail} to ${status}`);
       
-      const getUserPresence = await client.graphql({
-        query: queries.getUserPresence,
-        variables: { id: userEmail }
-      });
-  
       const currentTimestamp = new Date().toISOString();
   
-      if (getUserPresence.data.getUserPresence) {
-        const response = await client.graphql({
-          query: mutations.updateUserPresence,
-          variables: {
-            input: {
-              id: userEmail,
-              email: userEmail,
-              status: status,
-              lastActiveTimestamp: currentTimestamp
-            }
+      await client.graphql({
+        query: mutations.updateUserPresence,
+        variables: {
+          input: {
+            id: userEmail,
+            email: userEmail,
+            status: status,
+            lastActiveTimestamp: currentTimestamp
           }
-        });
-        console.log('User presence updated:', response);
-      } else {
-        const response = await client.graphql({
-          query: mutations.createUserPresence,
-          variables: {
-            input: {
-              id: userEmail,
-              email: userEmail,
-              status: status,
-              lastActiveTimestamp: currentTimestamp
-            }
-          }
-        });
-        console.log('User presence created:', response);
-      }
+        }
+      });
     } catch (error) {
       console.error('Error updating user presence:', error);
-      console.error('Error details:', JSON.stringify(error, null, 2));
     }
   }, [userEmail]);
+
+  const fetchUserPresence = useCallback(async () => {
+    try {
+      const presenceData = await client.graphql({
+        query: queries.listUserPresences
+      });
+      const currentTime = Date.now();
+      const activeUsers = presenceData.data.listUserPresences.items.filter(u => {
+        const lastActiveTime = new Date(u.lastActiveTimestamp).getTime();
+        const timeDifference = currentTime - lastActiveTime;
+        return u.status === 'online' && timeDifference < 60000; // Consider users active for 1 minute
+      });
+      setPresentUsers(prevUsers => {
+        if (JSON.stringify(prevUsers) !== JSON.stringify(activeUsers)) {
+          return activeUsers;
+        }
+        return prevUsers;
+      });
+    } catch (error) {
+      console.error('Error fetching user presence:', error);
+    }
+  }, []);
 
   const fetchChats = useCallback(async () => {
     try {
@@ -110,32 +113,48 @@ function App({ signOut, user }) {
     }
   }, []);
 
-  const fetchUserPresence = useCallback(async () => {
-    try {
-      const presenceData = await client.graphql({
-        query: queries.listUserPresences
-      });
-      const currentTime = new Date();
-      const activeUsers = presenceData.data.listUserPresences.items.filter(u => {
-        const lastActiveTime = new Date(u.lastActiveTimestamp);
-        const timeDifference = currentTime - lastActiveTime;
-        return u.status === 'online' && timeDifference < 5000;
-      });
-      setPresentUsers(activeUsers);
-    } catch (error) {
-      console.error('Error fetching user presence:', error);
+  const handleVisibilityChange = useCallback(() => {
+    if (document.hidden) {
+      updateUserPresence('away');
+    } else {
+      updateUserPresence('online');
     }
-  }, []);
+  }, [updateUserPresence]);
+
+  const handleActivityDetection = useCallback(() => {
+    const now = Date.now();
+    if (now - lastActiveRef.current > 60000) {
+      updateUserPresence('online');
+    }
+    lastActiveRef.current = now;
+  }, [updateUserPresence]);
 
   useEffect(() => {
     fetchChats();
     fetchUserPresence();
-    updateUserPresence();
+    updateUserPresence('online');
     
-    const intervalId = setInterval(() => {
-      updateUserPresence();
-      fetchUserPresence();
-    }, 5000);
+    const activityEvents = ['mousedown', 'keydown', 'touchstart', 'mousemove'];
+    activityEvents.forEach(event => {
+      window.addEventListener(event, handleActivityDetection);
+    });
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    const presenceInterval = setInterval(() => {
+      const now = Date.now();
+      if (now - lastActiveRef.current > 60000) {
+        updateUserPresence('away');
+      }
+    }, 60000); // Check every minute
+    
+    const fetchInterval = setInterval(fetchUserPresence, 10000);
+
+    const handleBeforeUnload = () => {
+      updateUserPresence('offline');
+    };
+  
+    window.addEventListener('beforeunload', handleBeforeUnload);
   
     const chatSub = client.graphql({
       query: subscriptions.onCreateChat
@@ -208,10 +227,10 @@ function App({ signOut, user }) {
         if (data.onUpdateUserPresence) {
           setPresentUsers((prev) => {
             const updatedUsers = prev.filter(u => u.email !== data.onUpdateUserPresence.email);
-            const lastActiveTime = new Date(data.onUpdateUserPresence.lastActiveTimestamp);
-            const currentTime = new Date();
+            const lastActiveTime = new Date(data.onUpdateUserPresence.lastActiveTimestamp).getTime();
+            const currentTime = Date.now();
             const timeDifference = currentTime - lastActiveTime;
-            if (data.onUpdateUserPresence.status === 'online' && timeDifference < 5000) {
+            if (data.onUpdateUserPresence.status === 'online' && timeDifference < 60000) {
               return [...updatedUsers, data.onUpdateUserPresence];
             }
             return updatedUsers;
@@ -220,24 +239,23 @@ function App({ signOut, user }) {
       },
       error: (err) => console.error(err)
     });
-  
-    const handleBeforeUnload = () => {
-      updateUserPresence('offline');
-    };
-  
-    window.addEventListener('beforeunload', handleBeforeUnload);
-  
+
     return () => {
-      clearInterval(intervalId);
+      clearInterval(presenceInterval);
+      clearInterval(fetchInterval);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      activityEvents.forEach(event => {
+        window.removeEventListener(event, handleActivityDetection);
+      });
+      window.removeEventListener('beforeunload', handleBeforeUnload);
       chatSub.unsubscribe();
       deleteChatSub.unsubscribe();
       reactionSub.unsubscribe();
       updateReactionSub.unsubscribe();
       presenceSub.unsubscribe();
       updateUserPresence('offline');
-      window.removeEventListener('beforeunload', handleBeforeUnload);
     };
-  }, [updateUserPresence, fetchChats, fetchUserPresence]);
+  }, [updateUserPresence, fetchChats, fetchUserPresence, handleVisibilityChange, handleActivityDetection]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -252,7 +270,9 @@ function App({ signOut, user }) {
             input: {
               message: e.target.value.trim(),
               email: userEmail,
-              timestamp: new Date().toISOString()
+              timestamp: new Date().toISOString(),
+              isPublic: isPublic,
+              recipient: isPublic ? null : recipient
             },
           },
         });
@@ -263,7 +283,6 @@ function App({ signOut, user }) {
       }
     }
   };
-
   const handleDelete = async (chatId) => {
     try {
       await client.graphql({
