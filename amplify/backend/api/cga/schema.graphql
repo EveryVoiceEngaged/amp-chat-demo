@@ -8,39 +8,39 @@ type IssueGuide @model @auth(rules: [{allow: public}]) {
 }
 
 type Issue {
-    title: String!
-    description: String!
-    presentationUrl: String
-    documentUrl: String
-    additionalDocuments: [AdditionalDocument]
-    exitUrl: String
-    exitUrlParameters: [ExitUrlParameter!]
+  title: String!
+  description: String!
+  presentationUrl: String
+  documentUrl: String
+  additionalDocuments: [AdditionalDocument]
+  exitUrl: String
+  exitUrlParameters: [ExitUrlParameter!]
 }
 
 type AdditionalDocument {
-    name: String!
-    url: String!
+  name: String!
+  url: String!
 }
 
 type ExitUrlParameter {
-    name: String!
-    value: String!
+  name: String!
+  value: String!
 }
 
 type Option {
-    title: String!
-    description: String!
-    presentationUrl: String
-    actions: [Action!]
+  title: String!
+  description: String!
+  presentationUrl: String
+  actions: [Action!]
 }
 
 type Action {
-    description: String!
-    drawbacks: [Drawback!]
+  description: String!
+  drawbacks: [Drawback!]
 }
 
 type Drawback {
-    description: String!
+  description: String!
 }
 
 type ScheduledForum @model @auth(rules: [{allow: public}]) {
