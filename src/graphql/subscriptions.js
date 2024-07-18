@@ -129,6 +129,8 @@ export const onCreateScheduledForum = /* GraphQL */ `
         timestamp
         isPublic
         recipient
+        attachment
+        attachmentType
         createdAt
         updatedAt
         __typename
@@ -187,6 +189,8 @@ export const onUpdateScheduledForum = /* GraphQL */ `
         timestamp
         isPublic
         recipient
+        attachment
+        attachmentType
         createdAt
         updatedAt
         __typename
@@ -245,6 +249,8 @@ export const onDeleteScheduledForum = /* GraphQL */ `
         timestamp
         isPublic
         recipient
+        attachment
+        attachmentType
         createdAt
         updatedAt
         __typename
@@ -305,6 +311,8 @@ export const onCreateGala = /* GraphQL */ `
         timestamp
         isPublic
         recipient
+        attachment
+        attachmentType
         createdAt
         updatedAt
         __typename
@@ -365,6 +373,8 @@ export const onUpdateGala = /* GraphQL */ `
         timestamp
         isPublic
         recipient
+        attachment
+        attachmentType
         createdAt
         updatedAt
         __typename
@@ -425,6 +435,8 @@ export const onDeleteGala = /* GraphQL */ `
         timestamp
         isPublic
         recipient
+        attachment
+        attachmentType
         createdAt
         updatedAt
         __typename
@@ -455,6 +467,8 @@ export const onCreateChat = /* GraphQL */ `
         nextToken
         __typename
       }
+      attachment
+      attachmentType
       createdAt
       updatedAt
       __typename
@@ -474,6 +488,8 @@ export const onUpdateChat = /* GraphQL */ `
         nextToken
         __typename
       }
+      attachment
+      attachmentType
       createdAt
       updatedAt
       __typename
@@ -493,6 +509,8 @@ export const onDeleteChat = /* GraphQL */ `
         nextToken
         __typename
       }
+      attachment
+      attachmentType
       createdAt
       updatedAt
       __typename
@@ -512,6 +530,8 @@ export const onCreateReaction = /* GraphQL */ `
         timestamp
         isPublic
         recipient
+        attachment
+        attachmentType
         createdAt
         updatedAt
         __typename
@@ -536,6 +556,8 @@ export const onUpdateReaction = /* GraphQL */ `
         timestamp
         isPublic
         recipient
+        attachment
+        attachmentType
         createdAt
         updatedAt
         __typename
@@ -560,6 +582,8 @@ export const onDeleteReaction = /* GraphQL */ `
         timestamp
         isPublic
         recipient
+        attachment
+        attachmentType
         createdAt
         updatedAt
         __typename

@@ -88,6 +88,8 @@ export const getScheduledForum = /* GraphQL */ `
         timestamp
         isPublic
         recipient
+        attachment
+        attachmentType
         createdAt
         updatedAt
         __typename
@@ -181,6 +183,8 @@ export const getGala = /* GraphQL */ `
         timestamp
         isPublic
         recipient
+        attachment
+        attachmentType
         createdAt
         updatedAt
         __typename
@@ -248,6 +252,8 @@ export const getChat = /* GraphQL */ `
         nextToken
         __typename
       }
+      attachment
+      attachmentType
       createdAt
       updatedAt
       __typename
@@ -268,6 +274,8 @@ export const listChats = /* GraphQL */ `
         timestamp
         isPublic
         recipient
+        attachment
+        attachmentType
         createdAt
         updatedAt
         __typename
@@ -290,6 +298,8 @@ export const getReaction = /* GraphQL */ `
         timestamp
         isPublic
         recipient
+        attachment
+        attachmentType
         createdAt
         updatedAt
         __typename

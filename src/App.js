@@ -6,6 +6,7 @@ import { generateClient } from 'aws-amplify/api';
 import * as mutations from "./graphql/mutations";
 import * as subscriptions from "./graphql/subscriptions";
 import * as queries from "./graphql/queries";
+import { uploadData } from "aws-amplify/storage";
 
 const client = generateClient();
 
@@ -28,54 +29,55 @@ function App({ signOut, user }) {
   const userEmail = user.signInDetails.loginId;
   const [chats, setChats] = useState([]);
   const [presentUsers, setPresentUsers] = useState([]);
-  const [isPublic, setIsPublic] = useState(true);
-  const [recipient, setRecipient] = useState('');
   const messagesEndRef = useRef(null);
-  const lastActiveRef = useRef(Date.now());
+  const [attachDetachText, setAttachDetachText] = useState("Attach");
+  const [attachment, setAttachment] = useState(null);
+  const [attachmentType, setAttachmentType] = useState(null);
+  const [attachmentUrl, setAttachmentUrl] = useState(null);
   
   const updateUserPresence = useCallback(async (status = 'online') => {
     try {
       console.log(`Updating presence for ${userEmail} to ${status}`);
       
+      const getUserPresence = await client.graphql({
+        query: queries.getUserPresence,
+        variables: { id: userEmail }
+      });
+  
       const currentTimestamp = new Date().toISOString();
   
-      await client.graphql({
-        query: mutations.updateUserPresence,
-        variables: {
-          input: {
-            id: userEmail,
-            email: userEmail,
-            status: status,
-            lastActiveTimestamp: currentTimestamp
+      if (getUserPresence.data.getUserPresence) {
+        const response = await client.graphql({
+          query: mutations.updateUserPresence,
+          variables: {
+            input: {
+              id: userEmail,
+              email: userEmail,
+              status: status,
+              lastActiveTimestamp: currentTimestamp
+            }
           }
-        }
-      });
+        });
+        console.log('User presence updated:', response);
+      } else {
+        const response = await client.graphql({
+          query: mutations.createUserPresence,
+          variables: {
+            input: {
+              id: userEmail,
+              email: userEmail,
+              status: status,
+              lastActiveTimestamp: currentTimestamp
+            }
+          }
+        });
+        console.log('User presence created:', response);
+      }
     } catch (error) {
       console.error('Error updating user presence:', error);
+      console.error('Error details:', JSON.stringify(error, null, 2));
     }
   }, [userEmail]);
-
-  const fetchUserPresence = useCallback(async () => {
-    try {
-      const presenceData = await client.graphql({
-        query: queries.listUserPresences
-      });
-      const currentTime = Date.now();
-      const activeUsers = presenceData.data.listUserPresences.items.filter(u => {
-        const lastActiveTime = new Date(u.lastActiveTimestamp).getTime();
-        const timeDifference = currentTime - lastActiveTime;
-        return u.status === 'online' && timeDifference < 60000; // Consider users active for 1 minute
-      });
-      setPresentUsers(prevUsers => {
-        if (JSON.stringify(prevUsers) !== JSON.stringify(activeUsers)) {
-          return activeUsers;
-        }
-        return prevUsers;
-      });
-    } catch (error) {
-      console.error('Error fetching user presence:', error);
-    }
-  }, []);
 
   const fetchChats = useCallback(async () => {
     try {
@@ -113,48 +115,32 @@ function App({ signOut, user }) {
     }
   }, []);
 
-  const handleVisibilityChange = useCallback(() => {
-    if (document.hidden) {
-      updateUserPresence('away');
-    } else {
-      updateUserPresence('online');
+  const fetchUserPresence = useCallback(async () => {
+    try {
+      const presenceData = await client.graphql({
+        query: queries.listUserPresences
+      });
+      const currentTime = new Date();
+      const activeUsers = presenceData.data.listUserPresences.items.filter(u => {
+        const lastActiveTime = new Date(u.lastActiveTimestamp);
+        const timeDifference = currentTime - lastActiveTime;
+        return u.status === 'online' && timeDifference < 5000;
+      });
+      setPresentUsers(activeUsers);
+    } catch (error) {
+      console.error('Error fetching user presence:', error);
     }
-  }, [updateUserPresence]);
-
-  const handleActivityDetection = useCallback(() => {
-    const now = Date.now();
-    if (now - lastActiveRef.current > 60000) {
-      updateUserPresence('online');
-    }
-    lastActiveRef.current = now;
-  }, [updateUserPresence]);
+  }, []);
 
   useEffect(() => {
     fetchChats();
     fetchUserPresence();
-    updateUserPresence('online');
+    updateUserPresence();
     
-    const activityEvents = ['mousedown', 'keydown', 'touchstart', 'mousemove'];
-    activityEvents.forEach(event => {
-      window.addEventListener(event, handleActivityDetection);
-    });
-
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-
-    const presenceInterval = setInterval(() => {
-      const now = Date.now();
-      if (now - lastActiveRef.current > 60000) {
-        updateUserPresence('away');
-      }
-    }, 60000); // Check every minute
-    
-    const fetchInterval = setInterval(fetchUserPresence, 10000);
-
-    const handleBeforeUnload = () => {
-      updateUserPresence('offline');
-    };
-  
-    window.addEventListener('beforeunload', handleBeforeUnload);
+    const intervalId = setInterval(() => {
+      updateUserPresence();
+      fetchUserPresence();
+    }, 5000);
   
     const chatSub = client.graphql({
       query: subscriptions.onCreateChat
@@ -227,10 +213,10 @@ function App({ signOut, user }) {
         if (data.onUpdateUserPresence) {
           setPresentUsers((prev) => {
             const updatedUsers = prev.filter(u => u.email !== data.onUpdateUserPresence.email);
-            const lastActiveTime = new Date(data.onUpdateUserPresence.lastActiveTimestamp).getTime();
-            const currentTime = Date.now();
+            const lastActiveTime = new Date(data.onUpdateUserPresence.lastActiveTimestamp);
+            const currentTime = new Date();
             const timeDifference = currentTime - lastActiveTime;
-            if (data.onUpdateUserPresence.status === 'online' && timeDifference < 60000) {
+            if (data.onUpdateUserPresence.status === 'online' && timeDifference < 5000) {
               return [...updatedUsers, data.onUpdateUserPresence];
             }
             return updatedUsers;
@@ -239,23 +225,24 @@ function App({ signOut, user }) {
       },
       error: (err) => console.error(err)
     });
-
+  
+    const handleBeforeUnload = () => {
+      updateUserPresence('offline');
+    };
+  
+    window.addEventListener('beforeunload', handleBeforeUnload);
+  
     return () => {
-      clearInterval(presenceInterval);
-      clearInterval(fetchInterval);
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-      activityEvents.forEach(event => {
-        window.removeEventListener(event, handleActivityDetection);
-      });
-      window.removeEventListener('beforeunload', handleBeforeUnload);
+      clearInterval(intervalId);
       chatSub.unsubscribe();
       deleteChatSub.unsubscribe();
       reactionSub.unsubscribe();
       updateReactionSub.unsubscribe();
       presenceSub.unsubscribe();
       updateUserPresence('offline');
+      window.removeEventListener('beforeunload', handleBeforeUnload);
     };
-  }, [updateUserPresence, fetchChats, fetchUserPresence, handleVisibilityChange, handleActivityDetection]);
+  }, [updateUserPresence, fetchChats, fetchUserPresence]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -264,6 +251,23 @@ function App({ signOut, user }) {
   const handleKeyUp = async (e) => {
     if (e.key === "Enter" && e.target.value.trim()) {
       try {
+        let attachmentData = null;
+        let attachmentType = null;
+        if (attachment !== null) {
+          const attachmentKey = `attachments/${new Date().getTime()}-${attachment.name}`;
+          attachmentData = await uploadData({
+            path: attachmentKey,
+            data: await attachment.arrayBuffer(),
+            options: {
+              contentType: attachment.type
+            }
+          });
+          setAttachment(null);
+          setAttachmentType(null);
+          setAttachDetachText("Attach");
+          URL.revokeObjectURL(attachmentUrl);
+          setAttachmentUrl(null);
+        }
         const newChat = await client.graphql({
           query: mutations.createChat,
           variables: {
@@ -271,8 +275,8 @@ function App({ signOut, user }) {
               message: e.target.value.trim(),
               email: userEmail,
               timestamp: new Date().toISOString(),
-              isPublic: isPublic,
-              recipient: isPublic ? null : recipient
+              attachment: attachmentData?.path,
+              attachmentType: attachmentType
             },
           },
         });
@@ -283,6 +287,7 @@ function App({ signOut, user }) {
       }
     }
   };
+
   const handleDelete = async (chatId) => {
     try {
       await client.graphql({
@@ -296,26 +301,6 @@ function App({ signOut, user }) {
       setChats(chats.filter(chat => chat.id !== chatId));
     } catch (error) {
       console.error('Error deleting chat:', error);
-    }
-  };
-
-  const handleSendMessage = async (message) => {
-    try {
-      const newChat = await client.graphql({
-        query: mutations.createChat,
-        variables: {
-          input: {
-            message: message.trim(),
-            email: userEmail,
-            timestamp: new Date().toISOString(),
-            isPublic,
-            recipient: isPublic ? null : recipient
-          },
-        },
-      });
-      setChats((prev) => [...prev, {...newChat.data.createChat, reactions: []}]);
-    } catch (error) {
-      console.error('Error creating chat:', error);
     }
   };
 
@@ -366,6 +351,28 @@ function App({ signOut, user }) {
     }
   };
 
+  const openFileDialog = async () => {
+    if (attachment === null) {
+      const input = document.createElement("input");
+      input.type = "file";
+      input.accept = "image/*, video/*, audio/*";
+      input.onchange = async (e) => {
+        const file = e.target.files[0];
+        setAttachDetachText("Remove");
+        setAttachment(file);
+        setAttachmentType(file.type.split("/")[0]);
+        setAttachmentUrl(URL.createObjectURL(file));
+      };
+      input.click();
+    } else {
+      setAttachDetachText("Attach");
+      setAttachment(null);
+      setAttachmentType(null);
+      URL.revokeObjectURL(attachmentUrl);
+      setAttachmentUrl(null);
+    }
+  };
+
   const ChatMessage = ({ chat, handleDelete, handleReaction }) => {
     const emojis = ['👍', '❤️', '😂'];
   
@@ -377,6 +384,13 @@ function App({ signOut, user }) {
               <strong className="mr-2">{chat.email}:</strong>
               <span>{chat.message}</span>
             </div>
+            {
+              (chat.attachment) ? (
+                chat.attachmentType === "image" ? <img src={chat.attachment} alt="attachment" class="attachment" /> :
+                chat.attachmentType === "video" ? <video src={chat.attachment} controls class="attachment" /> :
+                chat.attachmentType === "audio" ? <audio src={chat.attachment} controls /> : null
+              ) : null
+            }
             <div className="flex mt-1">
               {emojis.map((emoji) => {
                 const reaction = chat.reactions.find(r => r.emoji === emoji);
@@ -426,16 +440,9 @@ function App({ signOut, user }) {
         </button>
       </div>
       <div className="flex-grow flex justify-center items-center p-4">
-      <div className="w-3/4 flex flex-col h-[80vh]">
-        <div className="flex-grow overflow-y-auto mb-4 p-4 border border-gray-300 rounded">
-          {chats
-            .filter(chat => 
-              isPublic ? chat.isPublic : (!chat.isPublic && 
-                ((chat.email === userEmail && chat.recipient === recipient) || 
-                (chat.email === recipient && chat.recipient === userEmail))
-              )
-            )
-            .map((chat) => (
+        <div className="w-3/4 flex flex-col h-[80vh]">
+          <div className="flex-grow overflow-y-auto mb-4 p-4 border border-gray-300 rounded">
+            {chats.map((chat) => (
               <ChatMessage 
                 key={chat.id}
                 chat={chat}
@@ -443,39 +450,24 @@ function App({ signOut, user }) {
                 handleReaction={handleReaction}
               />
             ))}
-          <div ref={messagesEndRef} />
-        </div>
-        <div className="relative mb-4">
-          <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="isPublic">
-            Public Message
-          </label>
-          <input
-            type="checkbox"
-            id="isPublic"
-            checked={isPublic}
-            onChange={(e) => setIsPublic(e.target.checked)}
-            className="mr-2 leading-tight"
-          />
-          {!isPublic && (
-            <div>
-              <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="recipient">
-                Recipient
-              </label>
-              <select
-                id="recipient"
-                value={recipient}
-                onChange={(e) => setRecipient(e.target.value)}
-                className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-              >
-                <option value="" disabled>Select a user</option>
-                {presentUsers.map(user => (
-                  <option key={user.email} value={user.email}>{user.email}</option>
-                ))}
-              </select>
-            </div>
-          )}
-        </div>
+            <div ref={messagesEndRef} />
+          </div>
           <div className="relative">
+			      <button onClick={openFileDialog}>{attachDetachText}</button>
+            {
+              attachment ? (
+                <div>
+                  <p>{attachment.name}</p>
+                  {
+                    (attachment) ? (
+                      attachmentType === "image" ? <img src={attachmentUrl} alt="attachment" className="attachment" /> :
+                      attachmentType === "video" ? <video src={attachmentUrl} controls class="attachment" /> :
+                      attachmentType === "audio" ? <audio src={attachmentUrl} controls /> : null
+                    ) : null
+                  }
+                </div>
+              ) : null
+            }
             <input
               type="text"
               name="search"
