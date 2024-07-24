@@ -135,6 +135,7 @@ export const createScheduledForum = /* GraphQL */ `
         recipient
         attachment
         attachmentType
+        avatar
         createdAt
         updatedAt
         __typename
@@ -196,6 +197,7 @@ export const updateScheduledForum = /* GraphQL */ `
         recipient
         attachment
         attachmentType
+        avatar
         createdAt
         updatedAt
         __typename
@@ -257,6 +259,7 @@ export const deleteScheduledForum = /* GraphQL */ `
         recipient
         attachment
         attachmentType
+        avatar
         createdAt
         updatedAt
         __typename
@@ -322,6 +325,7 @@ export const createGala = /* GraphQL */ `
         recipient
         attachment
         attachmentType
+        avatar
         createdAt
         updatedAt
         __typename
@@ -387,6 +391,7 @@ export const updateGala = /* GraphQL */ `
         recipient
         attachment
         attachmentType
+        avatar
         createdAt
         updatedAt
         __typename
@@ -452,6 +457,7 @@ export const deleteGala = /* GraphQL */ `
         recipient
         attachment
         attachmentType
+        avatar
         createdAt
         updatedAt
         __typename
@@ -487,6 +493,7 @@ export const createChat = /* GraphQL */ `
       }
       attachment
       attachmentType
+      avatar
       createdAt
       updatedAt
       __typename
@@ -511,6 +518,7 @@ export const updateChat = /* GraphQL */ `
       }
       attachment
       attachmentType
+      avatar
       createdAt
       updatedAt
       __typename
@@ -535,6 +543,7 @@ export const deleteChat = /* GraphQL */ `
       }
       attachment
       attachmentType
+      avatar
       createdAt
       updatedAt
       __typename
@@ -559,6 +568,7 @@ export const createReaction = /* GraphQL */ `
         recipient
         attachment
         attachmentType
+        avatar
         createdAt
         updatedAt
         __typename
@@ -588,6 +598,7 @@ export const updateReaction = /* GraphQL */ `
         recipient
         attachment
         attachmentType
+        avatar
         createdAt
         updatedAt
         __typename
@@ -617,6 +628,7 @@ export const deleteReaction = /* GraphQL */ `
         recipient
         attachment
         attachmentType
+        avatar
         createdAt
         updatedAt
         __typename
@@ -638,6 +650,7 @@ export const createUserPresence = /* GraphQL */ `
       email
       status
       lastActiveTimestamp
+      avatar
       createdAt
       updatedAt
       __typename
@@ -654,6 +667,7 @@ export const updateUserPresence = /* GraphQL */ `
       email
       status
       lastActiveTimestamp
+      avatar
       createdAt
       updatedAt
       __typename
@@ -670,6 +684,7 @@ export const deleteUserPresence = /* GraphQL */ `
       email
       status
       lastActiveTimestamp
+      avatar
       createdAt
       updatedAt
       __typename

@@ -28,12 +28,14 @@ export default function UserPresenceUpdateForm(props) {
     email: "",
     status: "",
     lastActiveTimestamp: "",
+    avatar: "",
   };
   const [email, setEmail] = React.useState(initialValues.email);
   const [status, setStatus] = React.useState(initialValues.status);
   const [lastActiveTimestamp, setLastActiveTimestamp] = React.useState(
     initialValues.lastActiveTimestamp
   );
+  const [avatar, setAvatar] = React.useState(initialValues.avatar);
   const [errors, setErrors] = React.useState({});
   const resetStateValues = () => {
     const cleanValues = userPresenceRecord
@@ -42,6 +44,7 @@ export default function UserPresenceUpdateForm(props) {
     setEmail(cleanValues.email);
     setStatus(cleanValues.status);
     setLastActiveTimestamp(cleanValues.lastActiveTimestamp);
+    setAvatar(cleanValues.avatar);
     setErrors({});
   };
   const [userPresenceRecord, setUserPresenceRecord] = React.useState(
@@ -66,6 +69,7 @@ export default function UserPresenceUpdateForm(props) {
     email: [{ type: "Required" }],
     status: [{ type: "Required" }],
     lastActiveTimestamp: [{ type: "Required" }],
+    avatar: [],
   };
   const runValidationTasks = async (
     fieldName,
@@ -113,6 +117,7 @@ export default function UserPresenceUpdateForm(props) {
           email,
           status,
           lastActiveTimestamp,
+          avatar: avatar ?? null,
         };
         const validationResponses = await Promise.all(
           Object.keys(validations).reduce((promises, fieldName) => {
@@ -176,6 +181,7 @@ export default function UserPresenceUpdateForm(props) {
               email: value,
               status,
               lastActiveTimestamp,
+              avatar,
             };
             const result = onChange(modelFields);
             value = result?.email ?? value;
@@ -202,6 +208,7 @@ export default function UserPresenceUpdateForm(props) {
               email,
               status: value,
               lastActiveTimestamp,
+              avatar,
             };
             const result = onChange(modelFields);
             value = result?.status ?? value;
@@ -232,6 +239,7 @@ export default function UserPresenceUpdateForm(props) {
               email,
               status,
               lastActiveTimestamp: value,
+              avatar,
             };
             const result = onChange(modelFields);
             value = result?.lastActiveTimestamp ?? value;
@@ -247,6 +255,33 @@ export default function UserPresenceUpdateForm(props) {
         errorMessage={errors.lastActiveTimestamp?.errorMessage}
         hasError={errors.lastActiveTimestamp?.hasError}
         {...getOverrideProps(overrides, "lastActiveTimestamp")}
+      ></TextField>
+      <TextField
+        label="Avatar"
+        isRequired={false}
+        isReadOnly={false}
+        value={avatar}
+        onChange={(e) => {
+          let { value } = e.target;
+          if (onChange) {
+            const modelFields = {
+              email,
+              status,
+              lastActiveTimestamp,
+              avatar: value,
+            };
+            const result = onChange(modelFields);
+            value = result?.avatar ?? value;
+          }
+          if (errors.avatar?.hasError) {
+            runValidationTasks("avatar", value);
+          }
+          setAvatar(value);
+        }}
+        onBlur={() => runValidationTasks("avatar", avatar)}
+        errorMessage={errors.avatar?.errorMessage}
+        hasError={errors.avatar?.hasError}
+        {...getOverrideProps(overrides, "avatar")}
       ></TextField>
       <Flex
         justifyContent="space-between"

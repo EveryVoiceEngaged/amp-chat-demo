@@ -38,6 +38,7 @@ export default function ChatUpdateForm(props) {
     recipient: "",
     attachment: "",
     attachmentType: "",
+    avatar: "",
   };
   const [message, setMessage] = React.useState(initialValues.message);
   const [email, setEmail] = React.useState(initialValues.email);
@@ -48,6 +49,7 @@ export default function ChatUpdateForm(props) {
   const [attachmentType, setAttachmentType] = React.useState(
     initialValues.attachmentType
   );
+  const [avatar, setAvatar] = React.useState(initialValues.avatar);
   const [errors, setErrors] = React.useState({});
   const resetStateValues = () => {
     const cleanValues = chatRecord
@@ -60,6 +62,7 @@ export default function ChatUpdateForm(props) {
     setRecipient(cleanValues.recipient);
     setAttachment(cleanValues.attachment);
     setAttachmentType(cleanValues.attachmentType);
+    setAvatar(cleanValues.avatar);
     setErrors({});
   };
   const [chatRecord, setChatRecord] = React.useState(chatModelProp);
@@ -86,6 +89,7 @@ export default function ChatUpdateForm(props) {
     recipient: [],
     attachment: [],
     attachmentType: [],
+    avatar: [],
   };
   const runValidationTasks = async (
     fieldName,
@@ -137,6 +141,7 @@ export default function ChatUpdateForm(props) {
           recipient: recipient ?? null,
           attachment: attachment ?? null,
           attachmentType: attachmentType ?? null,
+          avatar: avatar ?? null,
         };
         const validationResponses = await Promise.all(
           Object.keys(validations).reduce((promises, fieldName) => {
@@ -204,6 +209,7 @@ export default function ChatUpdateForm(props) {
               recipient,
               attachment,
               attachmentType,
+              avatar,
             };
             const result = onChange(modelFields);
             value = result?.message ?? value;
@@ -234,6 +240,7 @@ export default function ChatUpdateForm(props) {
               recipient,
               attachment,
               attachmentType,
+              avatar,
             };
             const result = onChange(modelFields);
             value = result?.email ?? value;
@@ -266,6 +273,7 @@ export default function ChatUpdateForm(props) {
               recipient,
               attachment,
               attachmentType,
+              avatar,
             };
             const result = onChange(modelFields);
             value = result?.timestamp ?? value;
@@ -296,6 +304,7 @@ export default function ChatUpdateForm(props) {
               recipient,
               attachment,
               attachmentType,
+              avatar,
             };
             const result = onChange(modelFields);
             value = result?.isPublic ?? value;
@@ -326,6 +335,7 @@ export default function ChatUpdateForm(props) {
               recipient: value,
               attachment,
               attachmentType,
+              avatar,
             };
             const result = onChange(modelFields);
             value = result?.recipient ?? value;
@@ -356,6 +366,7 @@ export default function ChatUpdateForm(props) {
               recipient,
               attachment: value,
               attachmentType,
+              avatar,
             };
             const result = onChange(modelFields);
             value = result?.attachment ?? value;
@@ -386,6 +397,7 @@ export default function ChatUpdateForm(props) {
               recipient,
               attachment,
               attachmentType: value,
+              avatar,
             };
             const result = onChange(modelFields);
             value = result?.attachmentType ?? value;
@@ -399,6 +411,37 @@ export default function ChatUpdateForm(props) {
         errorMessage={errors.attachmentType?.errorMessage}
         hasError={errors.attachmentType?.hasError}
         {...getOverrideProps(overrides, "attachmentType")}
+      ></TextField>
+      <TextField
+        label="Avatar"
+        isRequired={false}
+        isReadOnly={false}
+        value={avatar}
+        onChange={(e) => {
+          let { value } = e.target;
+          if (onChange) {
+            const modelFields = {
+              message,
+              email,
+              timestamp,
+              isPublic,
+              recipient,
+              attachment,
+              attachmentType,
+              avatar: value,
+            };
+            const result = onChange(modelFields);
+            value = result?.avatar ?? value;
+          }
+          if (errors.avatar?.hasError) {
+            runValidationTasks("avatar", value);
+          }
+          setAvatar(value);
+        }}
+        onBlur={() => runValidationTasks("avatar", avatar)}
+        errorMessage={errors.avatar?.errorMessage}
+        hasError={errors.avatar?.hasError}
+        {...getOverrideProps(overrides, "avatar")}
       ></TextField>
       <Flex
         justifyContent="space-between"

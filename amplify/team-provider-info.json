@@ -17,6 +17,12 @@
       },
       "api": {
         "cga": {}
+      },
+      "storage": {
+        "cgac964e68e": {
+          "bucketName": "attachments628e5-attachment",
+          "region": "us-east-2"
+        }
       }
     }
   }

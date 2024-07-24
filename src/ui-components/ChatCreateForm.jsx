@@ -36,6 +36,7 @@ export default function ChatCreateForm(props) {
     recipient: "",
     attachment: "",
     attachmentType: "",
+    avatar: "",
   };
   const [message, setMessage] = React.useState(initialValues.message);
   const [email, setEmail] = React.useState(initialValues.email);
@@ -46,6 +47,7 @@ export default function ChatCreateForm(props) {
   const [attachmentType, setAttachmentType] = React.useState(
     initialValues.attachmentType
   );
+  const [avatar, setAvatar] = React.useState(initialValues.avatar);
   const [errors, setErrors] = React.useState({});
   const resetStateValues = () => {
     setMessage(initialValues.message);
@@ -55,6 +57,7 @@ export default function ChatCreateForm(props) {
     setRecipient(initialValues.recipient);
     setAttachment(initialValues.attachment);
     setAttachmentType(initialValues.attachmentType);
+    setAvatar(initialValues.avatar);
     setErrors({});
   };
   const validations = {
@@ -65,6 +68,7 @@ export default function ChatCreateForm(props) {
     recipient: [],
     attachment: [],
     attachmentType: [],
+    avatar: [],
   };
   const runValidationTasks = async (
     fieldName,
@@ -116,6 +120,7 @@ export default function ChatCreateForm(props) {
           recipient,
           attachment,
           attachmentType,
+          avatar,
         };
         const validationResponses = await Promise.all(
           Object.keys(validations).reduce((promises, fieldName) => {
@@ -185,6 +190,7 @@ export default function ChatCreateForm(props) {
               recipient,
               attachment,
               attachmentType,
+              avatar,
             };
             const result = onChange(modelFields);
             value = result?.message ?? value;
@@ -215,6 +221,7 @@ export default function ChatCreateForm(props) {
               recipient,
               attachment,
               attachmentType,
+              avatar,
             };
             const result = onChange(modelFields);
             value = result?.email ?? value;
@@ -247,6 +254,7 @@ export default function ChatCreateForm(props) {
               recipient,
               attachment,
               attachmentType,
+              avatar,
             };
             const result = onChange(modelFields);
             value = result?.timestamp ?? value;
@@ -277,6 +285,7 @@ export default function ChatCreateForm(props) {
               recipient,
               attachment,
               attachmentType,
+              avatar,
             };
             const result = onChange(modelFields);
             value = result?.isPublic ?? value;
@@ -307,6 +316,7 @@ export default function ChatCreateForm(props) {
               recipient: value,
               attachment,
               attachmentType,
+              avatar,
             };
             const result = onChange(modelFields);
             value = result?.recipient ?? value;
@@ -337,6 +347,7 @@ export default function ChatCreateForm(props) {
               recipient,
               attachment: value,
               attachmentType,
+              avatar,
             };
             const result = onChange(modelFields);
             value = result?.attachment ?? value;
@@ -367,6 +378,7 @@ export default function ChatCreateForm(props) {
               recipient,
               attachment,
               attachmentType: value,
+              avatar,
             };
             const result = onChange(modelFields);
             value = result?.attachmentType ?? value;
@@ -380,6 +392,37 @@ export default function ChatCreateForm(props) {
         errorMessage={errors.attachmentType?.errorMessage}
         hasError={errors.attachmentType?.hasError}
         {...getOverrideProps(overrides, "attachmentType")}
+      ></TextField>
+      <TextField
+        label="Avatar"
+        isRequired={false}
+        isReadOnly={false}
+        value={avatar}
+        onChange={(e) => {
+          let { value } = e.target;
+          if (onChange) {
+            const modelFields = {
+              message,
+              email,
+              timestamp,
+              isPublic,
+              recipient,
+              attachment,
+              attachmentType,
+              avatar: value,
+            };
+            const result = onChange(modelFields);
+            value = result?.avatar ?? value;
+          }
+          if (errors.avatar?.hasError) {
+            runValidationTasks("avatar", value);
+          }
+          setAvatar(value);
+        }}
+        onBlur={() => runValidationTasks("avatar", avatar)}
+        errorMessage={errors.avatar?.errorMessage}
+        hasError={errors.avatar?.hasError}
+        {...getOverrideProps(overrides, "avatar")}
       ></TextField>
       <Flex
         justifyContent="space-between"

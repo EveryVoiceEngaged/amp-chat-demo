@@ -25,11 +25,13 @@ export declare type UserPresenceCreateFormInputValues = {
     email?: string;
     status?: string;
     lastActiveTimestamp?: string;
+    avatar?: string;
 };
 export declare type UserPresenceCreateFormValidationValues = {
     email?: ValidationFunction<string>;
     status?: ValidationFunction<string>;
     lastActiveTimestamp?: ValidationFunction<string>;
+    avatar?: ValidationFunction<string>;
 };
 export declare type PrimitiveOverrideProps<T> = Partial<T> & React.DOMAttributes<HTMLDivElement>;
 export declare type UserPresenceCreateFormOverridesProps = {
@@ -37,6 +39,7 @@ export declare type UserPresenceCreateFormOverridesProps = {
     email?: PrimitiveOverrideProps<TextFieldProps>;
     status?: PrimitiveOverrideProps<TextFieldProps>;
     lastActiveTimestamp?: PrimitiveOverrideProps<TextFieldProps>;
+    avatar?: PrimitiveOverrideProps<TextFieldProps>;
 } & EscapeHatchProps;
 export declare type UserPresenceCreateFormProps = React.PropsWithChildren<{
     overrides?: UserPresenceCreateFormOverridesProps | undefined | null;

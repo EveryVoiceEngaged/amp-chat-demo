@@ -90,6 +90,7 @@ export const getScheduledForum = /* GraphQL */ `
         recipient
         attachment
         attachmentType
+        avatar
         createdAt
         updatedAt
         __typename
@@ -185,6 +186,7 @@ export const getGala = /* GraphQL */ `
         recipient
         attachment
         attachmentType
+        avatar
         createdAt
         updatedAt
         __typename
@@ -254,6 +256,7 @@ export const getChat = /* GraphQL */ `
       }
       attachment
       attachmentType
+      avatar
       createdAt
       updatedAt
       __typename
@@ -276,6 +279,7 @@ export const listChats = /* GraphQL */ `
         recipient
         attachment
         attachmentType
+        avatar
         createdAt
         updatedAt
         __typename
@@ -300,6 +304,7 @@ export const getReaction = /* GraphQL */ `
         recipient
         attachment
         attachmentType
+        avatar
         createdAt
         updatedAt
         __typename
@@ -339,6 +344,7 @@ export const getUserPresence = /* GraphQL */ `
       email
       status
       lastActiveTimestamp
+      avatar
       createdAt
       updatedAt
       __typename
@@ -357,6 +363,7 @@ export const listUserPresences = /* GraphQL */ `
         email
         status
         lastActiveTimestamp
+        avatar
         createdAt
         updatedAt
         __typename

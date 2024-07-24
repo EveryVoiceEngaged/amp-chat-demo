@@ -28,6 +28,43 @@
   color: #61dafb;
 }
 
+.custom-avatar-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.custom-avatar-wrapper {
+  display: inline-block;
+}
+
+.custom-avatar-wrapper input[type="file"] {
+  display: none;
+}
+
+.custom-avatar-wrapper label {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 38px;
+  padding: 0 16px;
+  background-color: #4F46E5;
+  color: white;
+  border-radius: 0px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.custom-avatar-wrapper label:hover {
+  background-color: #4338CA;
+}
+
+.custom-avatar-wrapper label::before {
+  content: '';
+}
+
+
+
 @keyframes App-logo-spin {
   from {
     transform: rotate(0deg);

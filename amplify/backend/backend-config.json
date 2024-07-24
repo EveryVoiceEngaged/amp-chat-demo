@@ -47,5 +47,31 @@
       "providerPlugin": "awscloudformation",
       "service": "Cognito"
     }
+  },
+  "parameters": {
+    "AMPLIFY_storage_cgac964e68e_bucketName": {
+      "usedBy": [
+        {
+          "category": "storage",
+          "resourceName": "cgac964e68e"
+        }
+      ]
+    },
+    "AMPLIFY_storage_cgac964e68e_region": {
+      "usedBy": [
+        {
+          "category": "storage",
+          "resourceName": "cgac964e68e"
+        }
+      ]
+    }
+  },
+  "storage": {
+    "cgac964e68e": {
+      "dependsOn": [],
+      "providerPlugin": "awscloudformation",
+      "service": "S3",
+      "serviceType": "imported"
+    }
   }
 }
